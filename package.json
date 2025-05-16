@@ -1,0 +1,53 @@
+{
+  "dependencies": {
+    "@foxglove/cdr": "^3.3.0",
+    "@foxglove/rosmsg-serialization": "^2.0.3",
+    "@foxglove/rosmsg2-serialization": "^3.0.2",
+    "@foxglove/ulog": "^2.1.5",
+    "@foxglove/ws-protocol": "^0.8.0",
+    "@sequelize/postgres": "^7.0.0-alpha.45",
+    "axios": "^1.8.3",
+    "bcrypt": "^6.0.0",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "echarts": "^5.6.0",
+    "echarts-for-react": "^3.0.2",
+    "events": "^3.3.0",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "lodash": "^4.17.21",
+    "mongodb": "^6.15.0",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.10.0",
+    "pg": "^8.14.1",
+    "pg-hstore": "^2.3.4",
+    "protobufjs": "^7.4.0",
+    "reflect-metadata": "^0.2.2",
+    "sequelize": "^6.37.7",
+    "sequelize-typescript": "^2.1.6",
+    "sqlite3": "^5.1.7",
+    "typeorm": "^0.3.22",
+    "uuid": "^11.1.0",
+    "ws": "^8.18.1"
+  },
+  "scripts": {
+    "start": "nodemon",
+    "migrate": "sequelize-cli db:migrate",
+    "migrate:undo": "sequelize-cli db:migrate:undo",
+    "migrate:reset": "sequelize-cli db:migrate:undo:all && sequelize-cli db:migrate"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.14.0",
+    "@types/pg": "^8.11.11",
+    "@types/sequelize": "^4.28.20",
+    "@types/validator": "^13.12.3",
+    "@types/ws": "^8.18.0",
+    "nodemon": "^3.1.9",
+    "sequelize-cli": "^6.6.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  }
+}
