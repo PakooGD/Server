@@ -12,6 +12,7 @@ router.get('/equipment/device/searchInfo', XagController.searchInfo);
 router.get('/equipment/device/searchStatus', XagController.searchStatus);
 router.post('/equipment/device/create', XagController.create);
 router.get('/account/v1/common/user/route', AuthController.Route);
-
+router.get('/noflyzone/api/get_paging', AuthController.GetPaging);
+router.post('/equipment/home/delete', XagController.Delete);
 
 export default router;

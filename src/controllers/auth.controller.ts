@@ -23,6 +23,23 @@ export class AuthController {
     }
   }
 
+  static async GetPaging(req: Request, res: Response): Promise<void> {
+    try {
+      const headers = { ...req.headers };
+      const result = await AuthService.GetPaging(headers);
+
+      AuthController.sendResponse(res, result);
+    } catch (error) {
+      console.error('Login error:', error);
+      AuthController.sendResponse(res, {
+        message: 'Internal server error',
+        status: 500,
+      });
+    }
+  }
+
+
+
   static async Login(req: Request, res: Response): Promise<void> {
     try {
       const { phone, password, icc } = req.body;

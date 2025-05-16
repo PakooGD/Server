@@ -292,4 +292,49 @@ export class AuthService {
       };
     }
   }
+
+  static async GetPaging(headers:any) {
+    try {
+      // const response = await axios.get(``, { headers });
+
+      return {
+        message: "No Fly Zones Are Anvailiable.",
+        status: 200,
+        data: null
+      };
+
+      /*
+      DATA TYPE
+      {
+          recordCount: 0,
+          pageCount: 0,
+          data: [{
+            "id": 235,
+            "title": "Gu-Lian Airport",
+            "transfer": 2,
+            "country": "CN",
+            "city_name": "Mohe",
+            "center": "{\"lat\":52.91700845,\"lng\":122.42307965,\"radius\":4829.625}",
+            "shape": "{\"type\":1,\"data\":[{\"lat\":52.89319,\"lng\":122.4494487},{\"lat\":52.8916141,\"lng\":122.4421174},{\"lat\":52.8912361,\"lng\":122.4343602},{\"lat\":52.8920819,\"lng\":122.4267049},{\"lat\":52.8965733,\"lng\":122.4146218},{\"lat\":52.9121948,\"lng\":122.3890928},{\"lat\":52.91594,\"lng\":122.3843964},{\"lat\":52.9202905,\"lng\":122.3814668},{\"lat\":52.9249499,\"lng\":122.3805041},{\"lat\":52.9332593,\"lng\":122.383988},{\"lat\":52.9402537,\"lng\":122.3725436},{\"lat\":52.9478259,\"lng\":122.3853041},{\"lat\":52.9408288,\"lng\":122.3967325},{\"lat\":52.9424061,\"lng\":122.4040713},{\"lat\":52.9427845,\"lng\":122.4118376},{\"lat\":52.9419383,\"lng\":122.4195017},{\"lat\":52.9374392,\"lng\":122.4316026},{\"lat\":52.9218188,\"lng\":122.4571144},{\"lat\":52.918071,\"lng\":122.4618059},{\"lat\":52.9137188,\"lng\":122.464728},{\"lat\":52.9090587,\"lng\":122.4656821},{\"lat\":52.900761,\"lng\":122.4621941},{\"lat\":52.8937657,\"lng\":122.4736157},{\"lat\":52.886191,\"lng\":122.4608754},{\"lat\":52.89319,\"lng\":122.4494487}]}",
+            "raw": null,
+            "display": 1,
+            "type": 1,
+            "raw_from": 2,
+            "lat": 52.91700845,
+            "lng": 122.42307965,
+            "radius": 4829
+          }],
+          version: 0,
+        },
+      */
+
+    } catch (error) {
+      console.error('Internal Server Error:', error);
+      return {
+        data: null,
+        message: 'Internal server error',
+        status: 500
+      };
+    }
+  }
 }

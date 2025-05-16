@@ -1,11 +1,8 @@
-// src/controllers/xag.controller.ts
 import { Request, Response } from 'express';
 import { XagService } from '../services';
 import { User } from '../models/user.model';
 import { Device } from '../models/device.model';
-import { TokenService } from '../services';
 
-// Dictionary to store searchStatus results by serial number
 const deviceStatusCache: Record<string, any> = {};
 
 export class XagController {
@@ -27,6 +24,33 @@ export class XagController {
         }
     }
 
+    static async Delete(req: Request, res: Response): Promise<void> {
+        try {
+            const { serial_number } = req.body;
+
+            if (!serial_number) {
+                res.status(400).json({ 
+                    status: 400, 
+                    message: "serial_number is required" 
+                });
+                return;
+            }
+
+            const headers = { ...req.headers };
+            headers.host = 'dservice.xa.com'
+
+            const result = await XagService.Delete(headers, serial_number);
+
+            res.json(result);
+        } catch (error) {
+            console.error('Device deleting error:', error);
+            res.status(500).json({
+                message: error instanceof Error ? error.message : 'Internal server error',
+                status: 500,
+            });
+        }
+      }
+
     static async searchInfo(req: Request, res: Response): Promise<void> {
         try {
             const { serial_number } = req.query;
@@ -39,15 +63,13 @@ export class XagController {
                 return;
             }
 
-            // Forward request to another server
             const headers = { ...req.headers };
             headers.host = 'dservice.xa.com';
             const result = await XagService.forwardRequest('/api/equipment/device/searchInfo', headers, req.query);
 
             // Modify new_link field to true
             if (result.data) {
-                result.data.new_link = true;
-                // Store the result in cache
+                // result.data.new_link = true;
                 deviceStatusCache[serial_number.toString()] = result.data;
             }
 
@@ -80,9 +102,9 @@ export class XagController {
             const result = await XagService.forwardRequest('/api/equipment/device/searchStatus', headers, req.query);
 
             // Modify can_create field to true
-            if (result.data) {
-                result.data.can_create = true;
-            }
+            // if (result.data) {
+            //     result.data.can_create = true;
+            // }
 
             res.json(result);
 

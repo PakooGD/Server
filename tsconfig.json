@@ -11,5 +11,6 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
-  "include": ["src/**/*", "src/utils/FoxgloveHelpes"]
+  "include": ["src/**/*", "src/utils/FoxgloveHelpes"],
+  "exclude": ["/node_modules"]
 }

@@ -32,6 +32,7 @@
     "ws": "^8.18.1"
   },
   "scripts": {
+    "build": "tsc",
     "start": "nodemon",
     "migrate": "sequelize-cli db:migrate",
     "migrate:undo": "sequelize-cli db:migrate:undo",

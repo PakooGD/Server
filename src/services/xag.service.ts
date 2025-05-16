@@ -98,6 +98,54 @@ export class XagService {
     }
   }
 
+  static async Delete(headers: any, serial_number:any) {
+    try {
+      const token = headers.token;
+      const user = await User.findOne({ where: { token } });
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      if (!TokenService.verifyToken(user.expire_in)) {
+        const result = await TokenService.refreshToken(user.refresh_token_expire_in);
+        if (result != null) {
+          // Update the user with the new token information
+          await user.update({
+            access_token: result.access_token,
+            refresh_token: result.refresh_token,
+            expire_in: result.expire_in,
+            refresh_token_expire_in: result.refresh_token_expire_in,
+          });
+        } else {
+          return {
+            status: 401,
+            message: 'Token expired and refresh failed',
+          };
+        }
+      }
+
+      const device = await Device.findOne({
+          where: {
+              serial_number: serial_number,
+              user_id: user.id
+          }
+      });
+
+      if (!device) throw new Error('Device not found');
+
+      await device.destroy();
+
+      return {
+          status: 200,
+          message: 'Device successfully deleted',
+      };
+
+    } catch (error) {
+      console.error('Deleting device error:', error);
+      throw new Error('Failed to delete device');
+    }
+  }
+
   static async forwardRequest(endpoint: string, headers: any, params: any): Promise<any> {
     try {
       const response = await axios.get(`https://dservice.xa.com${endpoint}`, {
@@ -150,16 +198,6 @@ export class XagService {
     }
   }
 
-  static async getUserFromToken(token: string): Promise<User> {
-    try {
-      const user = await User.findOne({ where: { token } });
-      if (!user) {
-        throw new Error('User not found');
-      }
-      return user;
-    } catch (error) {
-      console.error('Get user from token error:', error);
-      throw new Error('Failed to get user from token');
-    }
-  }
 }
+
+
