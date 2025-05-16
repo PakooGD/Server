@@ -3,6 +3,7 @@ import { User } from '../models/user.model';
 import { Device } from '../models/device.model';
 import axios, { AxiosError } from 'axios';
 import { TokenService } from './token.service';
+import { ExternalApiService } from './'
 
 export class XagService {
   static async getDeviceLists(headers: any) {
@@ -14,7 +15,6 @@ export class XagService {
         throw new Error('User not found');
       }
 
-      // Check if the token is expired
       if (!TokenService.verifyToken(user.expire_in)) {
         // Try to refresh the token
         const result = await TokenService.refreshToken(user.refresh_token_expire_in);
@@ -35,12 +35,10 @@ export class XagService {
         }
       }
 
-      // Find devices associated with the user
       const devices = await Device.findAll({
         where: { user_id: user.id },
       });
 
-      // Return existed local devices
       if (devices && devices.length > 0) {
         return {
           status: 200,
@@ -51,12 +49,8 @@ export class XagService {
         };
       }
 
-      // If no local devices, fetch from external API
-      const response = await axios.get('https://dservice.xa.com/api/equipment/device/lists', {
-        headers: headers
-      });
-
-      // Save devices to database if fetch from external api successful
+      const response = await ExternalApiService.GetDeviceLists(headers)
+  
       if (response.data.data?.lists) {
         await Promise.all(
           response.data.data.lists.map(async (deviceData: any) => {
@@ -80,21 +74,8 @@ export class XagService {
         data: [],
       };
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('XAG Settings Error:', error.response?.data);
-        throw {
-          data: null,
-          message: error.response?.data?.message || 'Failed to get XAG user settings',
-          status: error.response?.status || 500,
-          headers: error.response?.headers
-        };
-      }
-      
-      throw {
-        data: null,
-        message: error instanceof Error ? error.message : 'Internal server error',
-        status: 500
-      };
+      console.error('getting devices error:', error);
+      throw new Error('Failed to get devices');
     }
   }
 
@@ -146,31 +127,23 @@ export class XagService {
     }
   }
 
-  static async forwardRequest(endpoint: string, headers: any, params: any): Promise<any> {
+  static async SearchInfo(headers: any, params: any): Promise<any> {
     try {
-      const response = await axios.get(`https://dservice.xa.com${endpoint}`, {
-        headers: {
-          ...headers,
-          host: 'dservice.xa.com'
-        },
-        params
-      });
-      
+      const response = await ExternalApiService.SearchInfo(headers,params)
       return response.data;
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('Forward request error:', error.response?.data);
-        throw {
-          status: error.response?.status || 500,
-          message: error.response?.data?.message || 'Failed to forward request',
-          data: error.response?.data
-        };
-      }
-      throw {
-        status: 500,
-        message: error instanceof Error ? error.message : 'Internal server error',
-        data: null
-      };
+      console.error('SearchInfo error:', error);
+      throw new Error('Failed to SearchInfo');
+    }
+  }
+
+  static async SearchStatus(headers: any, params: any): Promise<any> {
+    try {
+      const response = await ExternalApiService.SearchStatus(headers,params)   
+      return response.data;
+    } catch (error) {
+      console.error('SearchStatus error:', error);
+      throw new Error('Failed to SearchStatus');
     }
   }
 

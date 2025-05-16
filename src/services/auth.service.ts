@@ -257,9 +257,7 @@ export class AuthService {
         };
       }
 
-      const response = await axios.get(`https://passport.xag.cn/api/account/v1/common/user/route?account_key=${accountKey}`, {
-        headers
-      });
+      const response = await ExternalApiService.Route(headers, accountKey);
 
       accountKeys[response.data.data.user_guid.toString()] = accountKey;
 
