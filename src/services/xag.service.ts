@@ -64,7 +64,7 @@ export class XagService {
         return {
           status: 200,
           message: 'No devices available',
-          data: []
+          data: null
         };
       }
 
@@ -100,17 +100,13 @@ export class XagService {
         };
       }
 
-      return {
-        status: 200,
-        message: 'No devices found for user',
-        data: [],
-      };
+      return response.data
     } catch (error) {
       console.error('getting devices error:', error);
       throw new Error('Failed to get devices');
     }
   }
-  
+
   static async forwardRequest(endpoint: string, headers: any, params: any): Promise<any> {
     try {
       const response = await axios.get(`https://dservice.xa.com${endpoint}`, {

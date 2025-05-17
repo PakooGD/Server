@@ -13,7 +13,7 @@ export class XagController {
 
             const result = await XagService.getDeviceLists(headers);
             console.log(JSON.stringify(result))
-            res.json(result);
+            res.json(result.data);
 
         } catch (error) {
             console.error('Device list error:', error);
