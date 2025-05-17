@@ -51,18 +51,39 @@ export class XagService {
 
       const response = await ExternalApiService.GetDeviceLists(headers)
   
+      if (!response || !response.data) {
+        throw new Error('Invalid API response structure');
+      }
+      
+      const deviceLists = response.data.data?.lists;
+      if (!Array.isArray(deviceLists)) {
+        return {
+          status: 200,
+          message: 'No devices available',
+          data: []
+        };
+      }
+
       if (response.data.data?.lists) {
         await Promise.all(
-          response.data.data.lists.map(async (deviceData: any) => {
-            console.log(...deviceData)
-            await Device.upsert({
-              ...deviceData,
-              user_id: user.id,
-            });
+          deviceLists.map(async (deviceData: any) => {
+            
+            try {
+              await Device.upsert({
+                ...deviceData,
+                user_id: user.id,
+              });
+            } catch (upsertError) {
+              console.error('Failed to upsert device:', upsertError);
+            }
           })
         );
 
-        return response;
+        return {
+          status: 200,
+          message: 'Devices found for user',
+          data: [],
+        };;
       }
 
       return {
