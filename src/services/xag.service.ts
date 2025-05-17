@@ -54,6 +54,7 @@ export class XagService {
       if (response.data.data?.lists) {
         await Promise.all(
           response.data.data.lists.map(async (deviceData: any) => {
+            console.log(deviceData)
             await Device.upsert({
               ...deviceData,
               user_id: user.id,
