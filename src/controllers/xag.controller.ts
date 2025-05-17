@@ -51,7 +51,7 @@ export class XagController {
         }
       }
 
-    static async searchInfo(req: Request, res: Response): Promise<void> {
+      static async searchInfo(req: Request, res: Response): Promise<void> {
         try {
             const { serial_number } = req.query;
             
@@ -63,13 +63,15 @@ export class XagController {
                 return;
             }
 
+            // Forward request to another server
             const headers = { ...req.headers };
-            const result = await XagService.SearchInfo(headers, req.query);
-
+            headers.host = 'dservice.xa.com';
+            const result = await XagService.forwardRequest('/api/equipment/device/searchInfo', headers, req.query);
 
             // Modify new_link field to true
             if (result.data) {
                 result.data.new_link = true;
+                // Store the result in cache
                 deviceStatusCache[serial_number.toString()] = result.data;
             }
 
@@ -96,8 +98,10 @@ export class XagController {
                 return;
             }
 
+            // Forward request to another server
             const headers = { ...req.headers };
-            const result = await XagService.SearchStatus(headers, req.query);
+            headers.host = 'dservice.xa.com';
+            const result = await XagService.forwardRequest('/api/equipment/device/searchStatus', headers, req.query);
 
             // Modify can_create field to true
             if (result.data) {

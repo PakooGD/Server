@@ -110,7 +110,34 @@ export class XagService {
       throw new Error('Failed to get devices');
     }
   }
-
+  
+  static async forwardRequest(endpoint: string, headers: any, params: any): Promise<any> {
+    try {
+      const response = await axios.get(`https://dservice.xa.com${endpoint}`, {
+        headers: {
+          ...headers,
+          host: 'dservice.xa.com'
+        },
+        params
+      });
+      
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Forward request error:', error.response?.data);
+        throw {
+          status: error.response?.status || 500,
+          message: error.response?.data?.message || 'Failed to forward request',
+          data: error.response?.data
+        };
+      }
+      throw {
+        status: 500,
+        message: error instanceof Error ? error.message : 'Internal server error',
+        data: null
+      };
+    }
+  }
 
   static async Delete(headers: any, serial_number:any) {
     try {
