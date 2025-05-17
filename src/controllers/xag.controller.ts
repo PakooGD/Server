@@ -35,16 +35,23 @@ export class XagController {
 
             const headers = { ...req.headers };
             const result = await XagService.RedirectSearch('/api/equipment/device/searchInfo', headers, req.query);
-            
+
             if (result.data) {
-                result.data.new_link = true;
-
                 deviceStatusCache[serial_number.toString()] = result.data;
+                res.status(200).json({
+                    "status":200,
+                    "message":"Successful",
+                    "data":{
+                        "new_link":true, // result.data.new_link
+                        "serial_number":result.data.serial_number,
+                        "dev_id":result.data.dev_id,
+                        "name":result.data.name,
+                        "model":result.data.model,
+                        "model_name":result.data.model_name,
+                        "country_code":""
+                    }
+                });
             }
-
-            console.log(JSON.stringify(result))
-
-            res.status(200).json(result);
 
         } catch (error) {
             console.error('Device search info error:', error);
