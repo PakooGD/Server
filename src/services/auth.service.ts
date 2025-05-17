@@ -80,7 +80,7 @@ export class AuthService {
               await User.create({
                   whitelist: false,
                   guid: userData.guid,
-                  account_key: accountKeys[userData.guid],
+                  account_key: accountKeys[userData.guid] || 245,
                   name: userData.name,
                   nickname: userData.nickname,
                   icc: userData.icc,
