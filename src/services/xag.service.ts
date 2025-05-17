@@ -82,25 +82,14 @@ export class XagService {
           })
         );
 
-        // Fetch devices again after upsert and remove user_id
-        const updatedDevices = await Device.findAll({
-          where: { user_id: user.id },
-        });
-
-        return {
-          status: 200,
-          message: 'Devices found for user',
-          data: {
-            lists: updatedDevices.map(device => {
-              const deviceData = device.get({ plain: true });
-              delete deviceData.user_id; // Remove user_id
-              return deviceData;
-            })
-          },
-        };
+        return response.data;
       }
 
-      return response
+      return {
+        status: 200,
+        message: 'No devices found for user',
+        data: null,
+      };
     } catch (error) {
       console.error('getting devices error:', error);
       throw new Error('Failed to get devices');
