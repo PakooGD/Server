@@ -16,3 +16,4 @@ router.get('/noflyzone/api/get_paging', AuthController.GetPaging);
 router.post('/equipment/home/delete', XagController.Delete);
 
 export default router;
+

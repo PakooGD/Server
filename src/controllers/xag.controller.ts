@@ -69,7 +69,7 @@ export class XagController {
 
             // Modify new_link field to true
             if (result.data) {
-                // result.data.new_link = true;
+                result.data.new_link = true;
                 deviceStatusCache[serial_number.toString()] = result.data;
             }
 
@@ -100,9 +100,9 @@ export class XagController {
             const result = await XagService.SearchStatus(headers, req.query);
 
             // Modify can_create field to true
-            // if (result.data) {
-            //     result.data.can_create = true;
-            // }
+            if (result.data) {
+                result.data.can_create = true;
+            }
 
             res.json(result);
 
