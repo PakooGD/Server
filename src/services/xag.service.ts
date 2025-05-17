@@ -40,6 +40,7 @@ export class XagService {
       });
 
       if (devices && devices.length > 0) {
+        console.log(`Found:${devices}`)
         return {
           status: 200,
           message: 'Devices found for user',
@@ -75,7 +76,7 @@ export class XagService {
       } else {
         throw new Error('No devices available');
       }
-
+      console.log(JSON.stringify(result))
       return result;
       
     } catch (error) {
