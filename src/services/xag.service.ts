@@ -61,11 +61,7 @@ export class XagService {
           })
         );
 
-        return {
-          status: response.status,
-          message: response.data.message,
-          data: response.data.data,
-        };
+        return response;
       }
 
       return {
