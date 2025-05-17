@@ -47,7 +47,7 @@ export class ExternalApiService {
   }
 
   static async SearchInfo(headers:any, params:any): Promise<any> {
-    return await axios.get('`https://dservice.xa.com/api/equipment/device/searchInfo', {
+    return await axios.get('https://dservice.xa.com/api/equipment/device/searchInfo', {
       headers: {
         ...headers,
         host: 'dservice.xa.com'

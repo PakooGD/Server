@@ -44,7 +44,11 @@ export class XagService {
           status: 200,
           message: 'Devices found for user',
           data: {
-            lists: devices.map(device => device.get({ plain: true }))
+            lists: devices.map(device => {
+              const deviceData = device.get({ plain: true });
+              delete deviceData.user_id; // Remove user_id
+              return deviceData;
+            })
           },
         };
       }
@@ -67,7 +71,6 @@ export class XagService {
       if (response.data.data?.lists) {
         await Promise.all(
           deviceLists.map(async (deviceData: any) => {
-            
             try {
               await Device.upsert({
                 ...deviceData,
@@ -79,11 +82,22 @@ export class XagService {
           })
         );
 
+        // Fetch devices again after upsert and remove user_id
+        const updatedDevices = await Device.findAll({
+          where: { user_id: user.id },
+        });
+
         return {
           status: 200,
           message: 'Devices found for user',
-          data: [],
-        };;
+          data: {
+            lists: updatedDevices.map(device => {
+              const deviceData = device.get({ plain: true });
+              delete deviceData.user_id; // Remove user_id
+              return deviceData;
+            })
+          },
+        };
       }
 
       return {
@@ -96,6 +110,7 @@ export class XagService {
       throw new Error('Failed to get devices');
     }
   }
+
 
   static async Delete(headers: any, serial_number:any) {
     try {
@@ -190,5 +205,3 @@ export class XagService {
   }
 
 }
-
-
