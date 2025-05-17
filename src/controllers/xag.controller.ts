@@ -12,7 +12,7 @@ export class XagController {
             headers.host = 'dservice.xa.com'
 
             const result = await XagService.getDeviceLists(headers);
-
+            console.log(result)
             res.json(result);
 
         } catch (error) {
