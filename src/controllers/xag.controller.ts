@@ -67,7 +67,7 @@ export class XagController {
             const headers = { ...req.headers };
             headers.host = 'dservice.xa.com';
             const result = await XagService.forwardRequest('/api/equipment/device/searchInfo', headers, req.query);
-
+            console.log(JSON.stringify(result))
             // Modify new_link field to true
             if (result.data) {
                 result.data.new_link = true;
@@ -102,7 +102,7 @@ export class XagController {
             const headers = { ...req.headers };
             headers.host = 'dservice.xa.com';
             const result = await XagService.forwardRequest('/api/equipment/device/searchStatus', headers, req.query);
-
+            console.log(JSON.stringify(result))
             // Modify can_create field to true
             if (result.data) {
                 result.data.can_create = true;
