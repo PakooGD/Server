@@ -18,4 +18,4 @@ module.exports = {
     // production конфигурация
   }
 };
-CREATE USER xag_user WITH PASSWORD 'sI728f3h0thp';
+

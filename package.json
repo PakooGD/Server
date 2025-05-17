@@ -34,6 +34,7 @@
   "scripts": {
     "build": "tsc",
     "start": "nodemon",
+    "start:prod": "ts-node src/app.ts",
     "migrate": "sequelize-cli db:migrate",
     "migrate:undo": "sequelize-cli db:migrate:undo",
     "migrate:reset": "sequelize-cli db:migrate:undo:all && sequelize-cli db:migrate"
