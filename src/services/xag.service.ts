@@ -100,7 +100,7 @@ export class XagService {
         };
       }
 
-      return response.data
+      return response
     } catch (error) {
       console.error('getting devices error:', error);
       throw new Error('Failed to get devices');
