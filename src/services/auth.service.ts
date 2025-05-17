@@ -110,17 +110,12 @@ export class AuthService {
           return loginResponse;
       } catch (error) {
           console.error('External API login error:', error);
-          return {
-              data: null,
-              message: 'Failed to authenticate with external service',
-              status: 500,
-          };
+          throw new Error('External API login error');
       }
   }
 
   static async register(loginData: any) {
     try {
-
         const existingUser = await User.findOne({
           where: {
               [Op.or]: [
@@ -149,23 +144,19 @@ export class AuthService {
             };
         }
 
-      return await ExternalApiService.register(
-        loginData.headers,
-        loginData.alias,
-        loginData.app,
-        loginData.app_id,
-        loginData.platform,
-        loginData.registration_id,
-        loginData.tags,
-        loginData.version
-      );
+        return await ExternalApiService.register(
+          loginData.headers,
+          loginData.alias,
+          loginData.app,
+          loginData.app_id,
+          loginData.platform,
+          loginData.registration_id,
+          loginData.tags,
+          loginData.version
+        );
     } catch (error) {
-      console.error('External API registration error:', error);
-      return {
-        data: null,
-        message: 'Failed to register with external service',
-        status: 500,
-      };
+      console.error('Registration error:', error);
+      throw new Error('Registration error');
     }
   }
 
@@ -196,32 +187,16 @@ export class AuthService {
           "message": "success",
           "status": 200
         };
-    }
+      }
 
       const response = await axios.get('https://passport.xag.cn/api/account/v1/common/user/setting/get', {
         headers
       });
       
-      return {
-        data: response.data.data,
-        message: response.data.message,
-        status: response.status,
-      };
+      return response;
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('XAG Settings Error:', error.response?.data);
-        return {
-          data: null,
-          message: error.response?.data?.message || 'Failed to get XAG user settings',
-          status: error.response?.status || 500,
-        };
-      }
-      
-      return {
-        data: null,
-        message: 'Internal server error',
-        status: 500
-      };
+      console.error('Getting settings error:', error);
+      throw new Error('Getting settings error');
     }
   }
 
@@ -257,37 +232,14 @@ export class AuthService {
         };
       }
 
-      const response = await ExternalApiService.Route(headers, accountKey);
+      const result = await ExternalApiService.Route(headers, accountKey);
+      accountKeys[result.data.user_guid.toString()] = accountKey;
 
-      accountKeys[response.data.data.user_guid.toString()] = accountKey;
+      return result;
 
-      return {
-        data: {
-          user_guid: response.data.data.user_guid,
-          account_key: response.data.data.account_key,
-          country_code: response.data.data.country_code,
-          endpoint: response.data.data.endpoint,
-          is_migrate: false,
-          tip_status: 0
-        },
-        message: "success",
-        status: 200
-      };
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('XAG Settings Error:', error.response?.data);
-        return {
-          data: null,
-          message: error.response?.data?.message || 'Failed to get XAG user settings',
-          status: error.response?.status || 500,
-        };
-      }
-      console.error('Internal Server Error:', error);
-      return {
-        data: null,
-        message: 'Internal server error',
-        status: 500
-      };
+      console.error('Routing error:', error);
+      throw new Error('Routing error');
     }
   }
 
@@ -327,12 +279,8 @@ export class AuthService {
       */
 
     } catch (error) {
-      console.error('Internal Server Error:', error);
-      return {
-        data: null,
-        message: 'Internal server error',
-        status: 500
-      };
+      console.error('Paging error:', error);
+      throw new Error('Paging error');
     }
   }
 }

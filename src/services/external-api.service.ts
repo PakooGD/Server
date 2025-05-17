@@ -8,7 +8,10 @@ export class ExternalApiService {
       password,
       icc,
     }, {
-      headers: headers,
+      headers: {
+        ...headers,
+        host: 'passport.xag.cn'
+      },
     });
     return response.data;
   }
@@ -23,47 +26,52 @@ export class ExternalApiService {
       tags,
       version
     }, {
-      headers: headers,
+      headers: {
+        ...headers,
+        host: 'message.xa.com'
+      },
     });
     return response.data;
   }
 
   static async getUserSettings(headers:any): Promise<any> {
-    return await axios.post(`https://passport.xag.cn/api/account/v1/common/user/setting/get`, {
-      headers: headers,
+    const response = await axios.post(`https://passport.xag.cn/api/account/v1/common/user/setting/get`, {
+      headers: {
+        ...headers,
+        host: 'passport.xag.cn'
+      },
     });
+    return response.data;
   }
 
   static async Route(headers:any,accountKey:any): Promise<any> {
-    return await axios.get(`https://passport.xag.cn/api/account/v1/common/user/route?account_key=${accountKey}`, {
-      headers: headers,
+    const response = await axios.get(`https://passport.xag.cn/api/account/v1/common/user/route?account_key=${accountKey}`, {
+      headers: {
+        ...headers,
+        host: 'passport.xag.cn'
+      },
     });
+    return response.data;
   }
 
   static async GetDeviceLists(headers:any): Promise<any> {
-    return await axios.get('https://dservice.xa.com/api/equipment/device/lists', {
-      headers: headers,
-    });
-  }
-
-  static async SearchInfo(headers:any, params:any): Promise<any> {
-    return await axios.get('https://dservice.xa.com/api/equipment/device/searchInfo', {
+    const response = await axios.get('https://dservice.xa.com/api/equipment/device/lists', {
       headers: {
         ...headers,
         host: 'dservice.xa.com'
       },
-      params,
     });
-  }  
-  
-  static async SearchStatus(headers:any, params:any): Promise<any> {
-    return await axios.get('https://dservice.xa.com/api/equipment/device/searchStatus', {
+    return response.data;
+  }
+
+  static async RedirectSearch(endpoint:string, headers:any,params:any): Promise<any> {
+    const response = await axios.get(`https://dservice.xa.com${endpoint}`, {
       headers: {
         ...headers,
         host: 'dservice.xa.com'
       },
-      params,
+      params
     });
+    return response.data;
   }
-
 }

@@ -46,29 +46,20 @@ export class XagService {
           data: {
             lists: devices.map(device => {
               const deviceData = device.get({ plain: true });
-              delete deviceData.user_id; // Remove user_id
+              delete deviceData.user_id; 
               return deviceData;
             })
           },
         };
       }
 
-      const response = await ExternalApiService.GetDeviceLists(headers)
+      const result = await ExternalApiService.GetDeviceLists(headers)
   
-      if (!response || !response.data) {
-        throw new Error('Invalid API response structure');
-      }
+      if (!result) throw new Error('Invalid API response structure');
       
-      const deviceLists = response.data.data?.lists;
-      if (!Array.isArray(deviceLists)) {
-        return {
-          status: 200,
-          message: 'No devices available',
-          data: null
-        };
-      }
+      const deviceLists = result.data?.lists;
 
-      if (response.data.data?.lists) {
+      if (deviceLists && Array.isArray(deviceLists)) {
         await Promise.all(
           deviceLists.map(async (deviceData: any) => {
             try {
@@ -81,46 +72,25 @@ export class XagService {
             }
           })
         );
-
-        return response.data;
+      } else {
+        throw new Error('No devices available');
       }
 
-      return {
-        status: 200,
-        message: 'No devices found for user',
-        data: null,
-      };
+      return result;
+      
     } catch (error) {
       console.error('getting devices error:', error);
       throw new Error('Failed to get devices');
     }
   }
 
-  static async forwardRequest(endpoint: string, headers: any, params: any): Promise<any> {
+  static async RedirectSearch(endpoint: string, headers: any, params: any): Promise<any> {
     try {
-      const response = await axios.get(`https://dservice.xa.com${endpoint}`, {
-        headers: {
-          ...headers,
-          host: 'dservice.xa.com'
-        },
-        params
-      });
-      
-      return response.data;
+      return await ExternalApiService.RedirectSearch(endpoint, headers, params)
+
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('Forward request error:', error.response?.data);
-        throw {
-          status: error.response?.status || 500,
-          message: error.response?.data?.message || 'Failed to forward request',
-          data: error.response?.data
-        };
-      }
-      throw {
-        status: 500,
-        message: error instanceof Error ? error.message : 'Internal server error',
-        data: null
-      };
+      console.error('Forwarding error:', error);
+      throw new Error('Failed to fetch info');
     }
   }
 
@@ -169,50 +139,6 @@ export class XagService {
     } catch (error) {
       console.error('Deleting device error:', error);
       throw new Error('Failed to delete device');
-    }
-  }
-
-  static async SearchInfo(headers: any, params: any): Promise<any> {
-    try {
-      const response = await ExternalApiService.SearchInfo(headers,params)
-      return response.data;
-    } catch (error) {
-      console.error('SearchInfo error:', error);
-      throw new Error('Failed to SearchInfo');
-    }
-  }
-
-  static async SearchStatus(headers: any, params: any): Promise<any> {
-    try {
-      const response = await ExternalApiService.SearchStatus(headers,params)   
-      return response.data;
-    } catch (error) {
-      console.error('SearchStatus error:', error);
-      throw new Error('Failed to SearchStatus');
-    }
-  }
-
-  static async createDevice(userId: number, deviceData: any): Promise<Device> {
-    try {
-      const device = await Device.create({
-        serial_number: deviceData.serial_number,
-        name: deviceData.name,
-        dev_id: "4A0040000551303438393030", // Can be generated or from request
-        model: "ACS2_21",
-        model_name: "ACS2 2021",
-        country_code: "",
-        user_id: userId,
-        authentication_info: deviceData.authentication_info,
-        bind_time: deviceData.bind_time,
-        lat: deviceData.lat,
-        lng: deviceData.lng,
-        secret: deviceData.secret
-      });
-
-      return device;
-    } catch (error) {
-      console.error('Create device error:', error);
-      throw new Error('Failed to create device');
     }
   }
 
