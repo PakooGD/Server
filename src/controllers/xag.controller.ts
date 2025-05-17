@@ -38,7 +38,8 @@ export class XagController {
 
             if (result.data) {
                 deviceStatusCache[serial_number.toString()] = result.data;
-                res.status(200).json({
+
+                const resu = {
                     "status":200,
                     "message":"Successful",
                     "data":{
@@ -50,7 +51,9 @@ export class XagController {
                         "model_name":result.data.model_name,
                         "country_code":""
                     }
-                });
+                }
+                console.log(JSON.stringify(resu))
+                res.status(200).json(resu);
             }
 
         } catch (error) {

@@ -40,7 +40,7 @@ export class XagService {
       });
 
       if (devices && devices.length > 0) {
-        console.log(`Found:${devices}`)
+        console.log(`Found:${JSON.stringify(devices)}`)
         return {
           status: 200,
           message: 'Devices found for user',
