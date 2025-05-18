@@ -77,7 +77,8 @@ export class ExternalApiService {
         headers: {
           ...headers,
           host: 'dservice.xa.com'
-        }
+        },
+        params
       }
     );
     return response.data;
