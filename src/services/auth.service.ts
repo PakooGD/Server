@@ -101,7 +101,7 @@ export class AuthService {
                   area: userData.area,
                   level: userData.level,
                   language: userData.language,
-                  country_code: 'KZ',
+                  country_code: '',
                   password: hashedPassword, 
               });
 
