@@ -8,78 +8,78 @@ import { ExternalApiService } from './'
 export class XagService {
   static async getDeviceLists(headers: any) {
     try {
-      const token = headers.token;
-      const user = await User.findOne({ where: { token } });
+      // const token = headers.token;
+      // const user = await User.findOne({ where: { token } });
 
-      if (!user) {
-        throw new Error('User not found');
-      }
+      // if (!user) {
+      //   throw new Error('User not found');
+      // }
 
-      if (!TokenService.verifyToken(user.expire_in)) {
-        // Try to refresh the token
-        const result = await TokenService.refreshToken(user.refresh_token_expire_in);
-        if (result != null) {
-          // Update the user with the new token information
-          await user.update({
-            access_token: result.access_token,
-            refresh_token: result.refresh_token,
-            expire_in: result.expire_in,
-            refresh_token_expire_in: result.refresh_token_expire_in,
-          });
-        } else {
-          return {
-            status: 401,
-            message: 'Token expired and refresh failed',
-            data: null,
-          };
-        }
-      }
+      // if (!TokenService.verifyToken(user.expire_in)) {
+      //   // Try to refresh the token
+      //   const result = await TokenService.refreshToken(user.refresh_token_expire_in);
+      //   if (result != null) {
+      //     // Update the user with the new token information
+      //     await user.update({
+      //       access_token: result.access_token,
+      //       refresh_token: result.refresh_token,
+      //       expire_in: result.expire_in,
+      //       refresh_token_expire_in: result.refresh_token_expire_in,
+      //     });
+      //   } else {
+      //     return {
+      //       status: 401,
+      //       message: 'Token expired and refresh failed',
+      //       data: null,
+      //     };
+      //   }
+      // }
 
-      const devices = await Device.findAll({
-        where: { user_id: user.id },
-      });
+      // const devices = await Device.findAll({
+      //   where: { user_id: user.id },
+      // });
 
-      console.log('Devices:',JSON.stringify(devices))
+      // console.log('Devices:',JSON.stringify(devices))
 
-      if (devices && devices.length > 0) {
-        console.log(`Found:${JSON.stringify(devices)}`)
-        return {
-          status: 200,
-          message: 'Devices found for user',
-          data: {
-            lists: devices.map(device => {
-              const deviceData = device.get({ plain: true });
-              delete deviceData.user_id; 
-              return deviceData;
-            })
-          },
-        };
-      }
+      // if (devices && devices.length > 0) {
+      //   console.log(`Found:${JSON.stringify(devices)}`)
+      //   return {
+      //     status: 200,
+      //     message: 'Devices found for user',
+      //     data: {
+      //       lists: devices.map(device => {
+      //         const deviceData = device.get({ plain: true });
+      //         delete deviceData.user_id; 
+      //         return deviceData;
+      //       })
+      //     },
+      //   };
+      // }
 
       const result = await ExternalApiService.GetDeviceLists(headers)
 
-      if (!result) throw new Error('Invalid API response structure');
+      // if (!result) throw new Error('Invalid API response structure');
       
-      const deviceLists = result.data?.lists;
+      // const deviceLists = result.data?.lists;
 
-      if (deviceLists && Array.isArray(deviceLists)) {
-        await Promise.all(
-          deviceLists.map(async (deviceData: any) => {
-            try {
-              await Device.upsert({
-                ...deviceData,
-                user_id: user.id,
-              });
-            } catch (upsertError) {
-              console.log('Failed to upsert device:', upsertError)
-              console.error('Failed to upsert device:', upsertError);
-            }
-          })
-        );
-      } else {
-        console.log('No devices available')
-        throw new Error('No devices available');
-      }
+      // if (deviceLists && Array.isArray(deviceLists)) {
+      //   await Promise.all(
+      //     deviceLists.map(async (deviceData: any) => {
+      //       try {
+      //         await Device.upsert({
+      //           ...deviceData,
+      //           user_id: user.id,
+      //         });
+      //       } catch (upsertError) {
+      //         console.log('Failed to upsert device:', upsertError)
+      //         console.error('Failed to upsert device:', upsertError);
+      //       }
+      //     })
+      //   );
+      // } else {
+      //   console.log('No devices available')
+      //   throw new Error('No devices available');
+      // }
       return result;
       
     } catch (error) {

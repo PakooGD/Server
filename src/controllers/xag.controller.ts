@@ -14,7 +14,7 @@ export class XagController {
             headers.host = 'dservice.xa.com'
             const result = await XagService.getDeviceLists(headers);
             console.log(JSON.stringify(result))
-            res.status(200).json(result);
+            res.json(result);
 
         } catch (error) {
             console.log('Device list error:', error);
