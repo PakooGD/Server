@@ -12,6 +12,7 @@ export class AuthController {
       const headers = { ...req.headers };
       const query = req.query
       const result = await AuthService.Route(headers, query);
+      console.log(JSON.stringify(result))
       AuthController.sendResponse(res, result);
     } catch (error) {
       console.error('Login error:', error);
@@ -26,7 +27,7 @@ export class AuthController {
     try {
       const headers = { ...req.headers };
       const result = await AuthService.GetPaging(headers);
-
+      console.log(JSON.stringify(result))
       AuthController.sendResponse(res, result);
     } catch (error) {
       console.error('Login error:', error);
@@ -51,7 +52,7 @@ export class AuthController {
 
       const headers = { ...req.headers };
       const result = await AuthService.login(headers, { phone, password, icc });
-     
+      console.log(JSON.stringify(result))
       AuthController.sendResponse(res, result);
     } catch (error) {
       console.error('Login error:', error);
@@ -77,7 +78,7 @@ export class AuthController {
         tags, 
         version 
       });
-      
+      console.log(JSON.stringify(result))
       AuthController.sendResponse(res, result);
     } catch (error) {
       console.error('Registration error:', error);
@@ -92,7 +93,7 @@ export class AuthController {
     try {
       const headers = { ...req.headers };
       const result = await AuthService.getUserSettings(headers);
-      
+      console.log(JSON.stringify(result))
       AuthController.sendResponse(res, result);
     } catch (error) {
       console.error('Settings error:', error);

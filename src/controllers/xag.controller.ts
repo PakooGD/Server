@@ -24,6 +24,7 @@ export class XagController {
 
     static async searchInfo(req: Request, res: Response): Promise<void> {
         try {
+            console.log("Search info")
             const { serial_number } = req.query;
             if (!serial_number) {
                 res.status(400).json({ 
@@ -35,7 +36,7 @@ export class XagController {
 
             const headers = { ...req.headers };
             const result = await XagService.RedirectSearch('/api/equipment/device/searchInfo', headers, req.query);
-
+            console.log(JSON.stringify(result))
             if (result.data) {
                 deviceStatusCache[serial_number.toString()] = result.data;
 
@@ -67,6 +68,7 @@ export class XagController {
 
     static async searchStatus(req: Request, res: Response): Promise<void> {
         try {
+            console.log("Search status")
             const { serial_number } = req.query;
             if (!serial_number) {
                 res.status(400).json({ 
