@@ -16,7 +16,7 @@ export class XagController {
             res.status(200).json(result);
 
         } catch (error) {
-            console.error('Device list error:', error);
+            console.log('Device list error:', error);
             res.status(500).json({
                 message: 'Internal server error',
                 status: 500,

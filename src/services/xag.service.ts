@@ -39,7 +39,7 @@ export class XagService {
         where: { user_id: user.id },
       });
 
-      console.log(JSON.stringify(devices))
+      console.log('Devices:',JSON.stringify(devices))
 
       if (devices && devices.length > 0) {
         console.log(`Found:${JSON.stringify(devices)}`)
@@ -57,13 +57,11 @@ export class XagService {
       }
 
       const result = await ExternalApiService.GetDeviceLists(headers)
-      console.log(JSON.stringify(result))
+
       if (!result) throw new Error('Invalid API response structure');
       
       const deviceLists = result.data?.lists;
 
-      console.log(JSON.stringify(deviceLists))
-      console.log(Array.isArray(deviceLists))
       if (deviceLists && Array.isArray(deviceLists)) {
         await Promise.all(
           deviceLists.map(async (deviceData: any) => {
@@ -82,7 +80,6 @@ export class XagService {
         console.log('No devices available')
         throw new Error('No devices available');
       }
-      console.log(JSON.stringify(result))
       return result;
       
     } catch (error) {
