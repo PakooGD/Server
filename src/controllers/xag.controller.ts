@@ -30,7 +30,7 @@ export class XagController {
 
             deviceStatusCache[serial_number.toString()] = result.data;
 
-            res.status(200).json({
+            res.json({
                 "status":200,
                 "message":"Successful",
                 "data":{
@@ -43,6 +43,7 @@ export class XagController {
                     "country_code":result.data.country_code
                 }
             });
+
         } catch (error) {
             console.error('Device search info error:', error);
             res.status(500).json({
@@ -61,7 +62,7 @@ export class XagController {
 
             result.data.can_create = true; // hardcoded to add any serial numbers to any accounts
 
-            res.status(200).json(result);
+            res.json(result);
 
         } catch (error) {
             console.error('Device search status error:', error);
