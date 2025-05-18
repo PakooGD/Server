@@ -3,7 +3,6 @@ import { User } from '../models/user.model';
 import { Device } from '../models/device.model';
 import axios, { AxiosError } from 'axios';
 import { TokenService } from './token.service';
-import { ExternalApiService } from './'
 
 export class XagService {
   static async getDeviceLists(headers: any) {
@@ -15,6 +14,7 @@ export class XagService {
         throw new Error('User not found');
       }
 
+      // Check if the token is expired
       if (!TokenService.verifyToken(user.expire_in)) {
         // Try to refresh the token
         const result = await TokenService.refreshToken(user.refresh_token_expire_in);
@@ -35,115 +35,131 @@ export class XagService {
         }
       }
 
+      // Find devices associated with the user
       const devices = await Device.findAll({
         where: { user_id: user.id },
       });
 
-      console.log('Devices:',JSON.stringify(devices))
-
+      // Return existed local devices
       if (devices && devices.length > 0) {
-        console.log(`Found:${JSON.stringify(devices)}`)
         return {
           status: 200,
           message: 'Devices found for user',
           data: {
-            lists: devices.map(device => {
-              const deviceData = device.get({ plain: true });
-              delete deviceData.user_id; 
-              return deviceData;
-            })
+            lists: devices.map(device => device.get({ plain: true }))
           },
         };
       }
 
-      const result = await ExternalApiService.GetDeviceLists(headers)
+      // If no local devices, fetch from external API
+      const response = await axios.get('https://dservice.xa.com/api/equipment/device/lists', {
+        headers: headers
+      });
 
-      if (!result) throw new Error('Invalid API response structure');
-      
-      const deviceLists = result.data?.lists;
-
-      if (deviceLists && Array.isArray(deviceLists)) {
+      // Save devices to database if fetch from external api successful
+      if (response.data.data?.lists) {
         await Promise.all(
-          deviceLists.map(async (deviceData: any) => {
-            try {
-              await Device.upsert({
-                ...deviceData,
-                user_id: user.id,
-              });
-            } catch (upsertError) {
-              console.log('Failed to upsert device:', upsertError)
-              console.error('Failed to upsert device:', upsertError);
-            }
+          response.data.data.lists.map(async (deviceData: any) => {
+            await Device.upsert({
+              ...deviceData,
+              user_id: user.id,
+            });
           })
         );
-      } else {
-        console.log('No devices available')
-        throw new Error('No devices available');
+
+        return {
+          status: response.status,
+          message: response.data.message,
+          data: response.data.data,
+        };
       }
-      return result;
+
+      return {
+        status: 200,
+        message: 'No devices found for user',
+        data: [],
+      };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('XAG Settings Error:', error.response?.data);
+        throw {
+          data: null,
+          message: error.response?.data?.message || 'Failed to get XAG user settings',
+          status: error.response?.status || 500,
+          headers: error.response?.headers
+        };
+      }
       
-    } catch (error) {
-      console.error('getting devices error:', error);
-      throw new Error('Failed to get devices');
+      throw {
+        data: null,
+        message: error instanceof Error ? error.message : 'Internal server error',
+        status: 500
+      };
     }
   }
 
-  static async RedirectSearch(endpoint: string, headers: any, params: any): Promise<any> {
+  static async forwardRequest(endpoint: string, headers: any, params: any): Promise<any> {
     try {
-      return await ExternalApiService.RedirectSearch(endpoint, headers, params)
-
+      const response = await axios.get(`https://dservice.xa.com${endpoint}`, {
+        headers: {
+          ...headers,
+          host: 'dservice.xa.com'
+        },
+        params
+      });
+      
+      return response.data;
     } catch (error) {
-      console.error('Forwarding error:', error);
-      throw new Error('Failed to fetch info');
+      if (axios.isAxiosError(error)) {
+        console.error('Forward request error:', error.response?.data);
+        throw {
+          status: error.response?.status || 500,
+          message: error.response?.data?.message || 'Failed to forward request',
+          data: error.response?.data
+        };
+      }
+      throw {
+        status: 500,
+        message: error instanceof Error ? error.message : 'Internal server error',
+        data: null
+      };
     }
   }
 
-  static async Delete(headers: any, serial_number:any) {
+  static async createDevice(userId: number, deviceData: any): Promise<Device> {
     try {
-      const token = headers.token;
+      const device = await Device.create({
+        serial_number: deviceData.serial_number,
+        name: deviceData.name,
+        dev_id: "4A0040000551303438393030", // Can be generated or from request
+        model: "ACS2_21",
+        model_name: "ACS2 2021",
+        country_code: "",
+        user_id: userId,
+        authentication_info: deviceData.authentication_info,
+        bind_time: deviceData.bind_time,
+        lat: deviceData.lat,
+        lng: deviceData.lng,
+        secret: deviceData.secret
+      });
+
+      return device;
+    } catch (error) {
+      console.error('Create device error:', error);
+      throw new Error('Failed to create device');
+    }
+  }
+
+  static async getUserFromToken(token: string): Promise<User> {
+    try {
       const user = await User.findOne({ where: { token } });
       if (!user) {
         throw new Error('User not found');
       }
-
-      if (!TokenService.verifyToken(user.expire_in)) {
-        const result = await TokenService.refreshToken(user.refresh_token_expire_in);
-        if (result != null) {
-          // Update the user with the new token information
-          await user.update({
-            access_token: result.access_token,
-            refresh_token: result.refresh_token,
-            expire_in: result.expire_in,
-            refresh_token_expire_in: result.refresh_token_expire_in,
-          });
-        } else {
-          return {
-            status: 401,
-            message: 'Token expired and refresh failed',
-          };
-        }
-      }
-
-      const device = await Device.findOne({
-          where: {
-              serial_number: serial_number,
-              user_id: user.id
-          }
-      });
-
-      if (!device) throw new Error('Device not found');
-
-      await device.destroy();
-
-      return {
-          status: 200,
-          message: 'Device successfully deleted',
-      };
-
+      return user;
     } catch (error) {
-      console.error('Deleting device error:', error);
-      throw new Error('Failed to delete device');
+      console.error('Get user from token error:', error);
+      throw new Error('Failed to get user from token');
     }
   }
-
 }

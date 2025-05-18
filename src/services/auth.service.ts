@@ -80,7 +80,7 @@ export class AuthService {
               await User.create({
                   whitelist: false,
                   guid: userData.guid,
-                  account_key: accountKeys[userData.guid] || 245,
+                  account_key: accountKeys[userData.guid],
                   name: userData.name,
                   nickname: userData.nickname,
                   icc: userData.icc,
@@ -110,12 +110,17 @@ export class AuthService {
           return loginResponse;
       } catch (error) {
           console.error('External API login error:', error);
-          throw new Error('External API login error');
+          return {
+              data: null,
+              message: 'Failed to authenticate with external service',
+              status: 500,
+          };
       }
   }
 
   static async register(loginData: any) {
     try {
+
         const existingUser = await User.findOne({
           where: {
               [Op.or]: [
@@ -144,19 +149,23 @@ export class AuthService {
             };
         }
 
-        return await ExternalApiService.register(
-          loginData.headers,
-          loginData.alias,
-          loginData.app,
-          loginData.app_id,
-          loginData.platform,
-          loginData.registration_id,
-          loginData.tags,
-          loginData.version
-        );
+      return await ExternalApiService.register(
+        loginData.headers,
+        loginData.alias,
+        loginData.app,
+        loginData.app_id,
+        loginData.platform,
+        loginData.registration_id,
+        loginData.tags,
+        loginData.version
+      );
     } catch (error) {
-      console.error('Registration error:', error);
-      throw new Error('Registration error');
+      console.error('External API registration error:', error);
+      return {
+        data: null,
+        message: 'Failed to register with external service',
+        status: 500,
+      };
     }
   }
 
@@ -187,16 +196,32 @@ export class AuthService {
           "message": "success",
           "status": 200
         };
-      }
+    }
 
       const response = await axios.get('https://passport.xag.cn/api/account/v1/common/user/setting/get', {
         headers
       });
       
-      return response;
+      return {
+        data: response.data.data,
+        message: response.data.message,
+        status: response.status,
+      };
     } catch (error) {
-      console.error('Getting settings error:', error);
-      throw new Error('Getting settings error');
+      if (axios.isAxiosError(error)) {
+        console.error('XAG Settings Error:', error.response?.data);
+        return {
+          data: null,
+          message: error.response?.data?.message || 'Failed to get XAG user settings',
+          status: error.response?.status || 500,
+        };
+      }
+      
+      return {
+        data: null,
+        message: 'Internal server error',
+        status: 500
+      };
     }
   }
 
@@ -232,55 +257,39 @@ export class AuthService {
         };
       }
 
-      const result = await ExternalApiService.Route(headers, accountKey);
-      accountKeys[result.data.user_guid.toString()] = accountKey;
+      const response = await axios.get(`https://passport.xag.cn/api/account/v1/common/user/route?account_key=${accountKey}`, {
+        headers
+      });
 
-      return result;
-
-    } catch (error) {
-      console.error('Routing error:', error);
-      throw new Error('Routing error');
-    }
-  }
-
-  static async GetPaging(headers:any) {
-    try {
-      // const response = await axios.get(``, { headers });
+      accountKeys[response.data.data.user_guid.toString()] = accountKey;
 
       return {
-        message: "No Fly Zones Are Anvailiable.",
-        status: 200,
-        data: null
-      };
-
-      /*
-      DATA TYPE
-      {
-          recordCount: 0,
-          pageCount: 0,
-          data: [{
-            "id": 235,
-            "title": "Gu-Lian Airport",
-            "transfer": 2,
-            "country": "CN",
-            "city_name": "Mohe",
-            "center": "{\"lat\":52.91700845,\"lng\":122.42307965,\"radius\":4829.625}",
-            "shape": "{\"type\":1,\"data\":[{\"lat\":52.89319,\"lng\":122.4494487},{\"lat\":52.8916141,\"lng\":122.4421174},{\"lat\":52.8912361,\"lng\":122.4343602},{\"lat\":52.8920819,\"lng\":122.4267049},{\"lat\":52.8965733,\"lng\":122.4146218},{\"lat\":52.9121948,\"lng\":122.3890928},{\"lat\":52.91594,\"lng\":122.3843964},{\"lat\":52.9202905,\"lng\":122.3814668},{\"lat\":52.9249499,\"lng\":122.3805041},{\"lat\":52.9332593,\"lng\":122.383988},{\"lat\":52.9402537,\"lng\":122.3725436},{\"lat\":52.9478259,\"lng\":122.3853041},{\"lat\":52.9408288,\"lng\":122.3967325},{\"lat\":52.9424061,\"lng\":122.4040713},{\"lat\":52.9427845,\"lng\":122.4118376},{\"lat\":52.9419383,\"lng\":122.4195017},{\"lat\":52.9374392,\"lng\":122.4316026},{\"lat\":52.9218188,\"lng\":122.4571144},{\"lat\":52.918071,\"lng\":122.4618059},{\"lat\":52.9137188,\"lng\":122.464728},{\"lat\":52.9090587,\"lng\":122.4656821},{\"lat\":52.900761,\"lng\":122.4621941},{\"lat\":52.8937657,\"lng\":122.4736157},{\"lat\":52.886191,\"lng\":122.4608754},{\"lat\":52.89319,\"lng\":122.4494487}]}",
-            "raw": null,
-            "display": 1,
-            "type": 1,
-            "raw_from": 2,
-            "lat": 52.91700845,
-            "lng": 122.42307965,
-            "radius": 4829
-          }],
-          version: 0,
+        data: {
+          user_guid: response.data.data.user_guid,
+          account_key: response.data.data.account_key,
+          country_code: response.data.data.country_code,
+          endpoint: response.data.data.endpoint,
+          is_migrate: false,
+          tip_status: 0
         },
-      */
-
+        message: "success",
+        status: 200
+      };
     } catch (error) {
-      console.error('Paging error:', error);
-      throw new Error('Paging error');
+      if (axios.isAxiosError(error)) {
+        console.error('XAG Settings Error:', error.response?.data);
+        return {
+          data: null,
+          message: error.response?.data?.message || 'Failed to get XAG user settings',
+          status: error.response?.status || 500,
+        };
+      }
+      console.error('Internal Server Error:', error);
+      return {
+        data: null,
+        message: 'Internal server error',
+        status: 500
+      };
     }
   }
 }

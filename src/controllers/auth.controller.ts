@@ -13,22 +13,6 @@ export class AuthController {
       headers.host = 'passport.xag.cn'
       const query = req.query
       const result = await AuthService.Route(headers, query);
-      console.log(JSON.stringify(result))
-      AuthController.sendResponse(res, result);
-    } catch (error) {
-      console.error('Login error:', error);
-      AuthController.sendResponse(res, {
-        message: 'Internal server error',
-        status: 500,
-      });
-    }
-  }
-
-  static async GetPaging(req: Request, res: Response): Promise<void> {
-    try {
-      const headers = { ...req.headers };
-      const result = await AuthService.GetPaging(headers);
-      console.log(JSON.stringify(result))
       AuthController.sendResponse(res, result);
     } catch (error) {
       console.error('Login error:', error);
@@ -53,8 +37,8 @@ export class AuthController {
 
       const headers = { ...req.headers };
       headers.host = 'passport.xag.cn'
+
       const result = await AuthService.login(headers, { phone, password, icc });
-      console.log(JSON.stringify(result))
       AuthController.sendResponse(res, result);
     } catch (error) {
       console.error('Login error:', error);
@@ -71,6 +55,7 @@ export class AuthController {
 
       const headers = { ...req.headers };
       headers.host = 'message.xa.com'
+
       const result = await AuthService.register({ 
         headers,
         alias, 
@@ -81,7 +66,7 @@ export class AuthController {
         tags, 
         version 
       });
-      console.log(JSON.stringify(result))
+      
       AuthController.sendResponse(res, result);
     } catch (error) {
       console.error('Registration error:', error);
@@ -96,9 +81,14 @@ export class AuthController {
     try {
       const headers = { ...req.headers };
       headers.host = 'passport.xag.cn'
+
       const result = await AuthService.getUserSettings(headers);
-      console.log(JSON.stringify(result))
-      AuthController.sendResponse(res, result);
+      
+      AuthController.sendResponse(res, {
+        data: result.data,
+        message: result.message,
+        status: result.status,
+      });
     } catch (error) {
       console.error('Settings error:', error);
       AuthController.sendResponse(res, {
@@ -107,5 +97,34 @@ export class AuthController {
       });
     }
   }
-}
 
+  static async getIotUserSession(req: Request, res: Response): Promise<void> {
+    try {
+      const token = req.headers['token'] as string;
+      const xaToken = req.headers['xa_token'] as string;
+
+      if (!token || !xaToken) {
+        AuthController.sendResponse(res, {
+          data: null,
+          message: 'token and xa_token are required',
+          status: 400
+        });
+        return;
+      }
+
+      AuthController.sendResponse(res, {
+        data: {
+          "iot_user_session": "mx4I7mLO-rmKy1iZQyzKE5H4YsgrEoKn0FuBe_Pq-7A.uluhAJQP2h_uNmdCGA3ZL8EUAN7RAjDuHNwyTeBA3vo"
+        },
+        message: "Successful",
+        status: 200
+      });
+    } catch (error) {
+      console.error('IOT session error:', error);
+      AuthController.sendResponse(res, {
+        message: 'Internal server error',
+        status: 500,
+      });
+    }
+  }
+}
