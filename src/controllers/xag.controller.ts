@@ -1,27 +1,25 @@
-// src/controllers/xag.controller.ts
 import { Request, Response } from 'express';
 import { XagService } from '../services';
 import { User } from '../models/user.model';
 import { Device } from '../models/device.model';
-import { TokenService } from '../services';
 
-// Dictionary to store searchStatus results by serial number
 const deviceStatusCache: Record<string, any> = {};
 
 export class XagController {
     static async getDeviceLists(req: Request, res: Response): Promise<void> {
+        console.log("getDeviceLists")
         try {
+            console.log(req.headers)
             const headers = { ...req.headers };
             headers.host = 'dservice.xa.com'
-
             const result = await XagService.getDeviceLists(headers);
-
-            res.json(result);
+            console.log(JSON.stringify(result))
+            res.status(200).json(result);
 
         } catch (error) {
-            console.error('Device list error:', error);
+            console.log('Device list error:', error);
             res.status(500).json({
-                message: error instanceof Error ? error.message : 'Internal server error',
+                message: 'Internal server error',
                 status: 500,
             });
         }
@@ -29,8 +27,8 @@ export class XagController {
 
     static async searchInfo(req: Request, res: Response): Promise<void> {
         try {
+            console.log("Search info")
             const { serial_number } = req.query;
-            
             if (!serial_number) {
                 res.status(400).json({ 
                     status: 400, 
@@ -39,24 +37,34 @@ export class XagController {
                 return;
             }
 
-            // Forward request to another server
             const headers = { ...req.headers };
-            headers.host = 'dservice.xa.com';
-            const result = await XagService.forwardRequest('/api/equipment/device/searchInfo', headers, req.query);
-
-            // Modify new_link field to true
+            headers.host = 'dservice.xa.com'
+            const result = await XagService.RedirectSearch('/api/equipment/device/searchInfo', headers, req.query);
+            console.log(JSON.stringify(result))
             if (result.data) {
-                result.data.new_link = true;
-                // Store the result in cache
                 deviceStatusCache[serial_number.toString()] = result.data;
-            }
 
-            res.json(result);
+                const resu = {
+                    "status":200,
+                    "message":"Successful",
+                    "data":{
+                        "new_link":true, // result.data.new_link
+                        "serial_number":result.data.serial_number,
+                        "dev_id":result.data.dev_id,
+                        "name":result.data.name,
+                        "model":result.data.model,
+                        "model_name":result.data.model_name,
+                        "country_code":""
+                    }
+                }
+                console.log(JSON.stringify(resu))
+                res.status(200).json(resu);
+            }
 
         } catch (error) {
             console.error('Device search info error:', error);
             res.status(500).json({
-                message: error instanceof Error ? error.message : 'Internal server error',
+                message:'Internal server error',
                 status: 500,
             });
         }
@@ -64,8 +72,8 @@ export class XagController {
 
     static async searchStatus(req: Request, res: Response): Promise<void> {
         try {
+            console.log("Search status")
             const { serial_number } = req.query;
-            
             if (!serial_number) {
                 res.status(400).json({ 
                     status: 400, 
@@ -74,22 +82,22 @@ export class XagController {
                 return;
             }
 
-            // Forward request to another server
             const headers = { ...req.headers };
-            headers.host = 'dservice.xa.com';
-            const result = await XagService.forwardRequest('/api/equipment/device/searchStatus', headers, req.query);
-
-            // Modify can_create field to true
+            headers.host = 'dservice.xa.com'
+            const result = await XagService.RedirectSearch('/api/equipment/device/searchStatus', headers, req.query);
+            
             if (result.data) {
                 result.data.can_create = true;
             }
 
-            res.json(result);
+            console.log(JSON.stringify(result))
+
+            res.status(200).json(result);
 
         } catch (error) {
             console.error('Device search status error:', error);
             res.status(500).json({
-                message: error instanceof Error ? error.message : 'Internal server error',
+                message:'Internal server error',
                 status: 500,
             });
         }
@@ -114,7 +122,7 @@ export class XagController {
             const statusData = deviceStatusCache[serialNumber] || {};
 
             // Create device in database with all required fields
-            const device = await Device.create({
+            await Device.create({
                 serial_number: serialNumber,
                 dev_id: statusData.dev_id || "Nothing",
                 model: statusData.model || "Nothing",
@@ -152,9 +160,38 @@ export class XagController {
         } catch (error) {
             console.error('Device create error:', error);
             res.status(500).json({
-                message: error instanceof Error ? error.message : 'Internal server error',
+                message:'Internal server error',
+                status: 500,
+            });
+        }
+    }
+
+    static async Delete(req: Request, res: Response): Promise<void> {
+        try {
+            const { serial_number } = req.body;
+
+            if (!serial_number) {
+                res.status(400).json({ 
+                    status: 400, 
+                    message: "serial_number is required" 
+                });
+                return;
+            }
+
+            const headers = { ...req.headers };
+            headers.host = 'dservice.xa.com'
+
+            const result = await XagService.Delete(headers, serial_number);
+
+            res.json(result);
+        } catch (error) {
+            console.error('Device deleting error:', error);
+            res.status(500).json({
+                message:'Internal server error',
                 status: 500,
             });
         }
     }
 }
+
+
