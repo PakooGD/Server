@@ -30,6 +30,8 @@ export class XagController {
 
             deviceStatusCache[serial_number.toString()] = result.data;
 
+            console.log(result,result.data)
+
             res.status(200).json({
                 "status":200,
                 "message":"Successful",
