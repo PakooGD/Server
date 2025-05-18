@@ -80,7 +80,7 @@ export class AuthService {
               await User.create({
                   whitelist: false,
                   guid: userData.guid,
-                  account_key: accountKeys[userData.guid] || 245,
+                  account_key: accountKeys[userData.guid],
                   name: userData.name,
                   nickname: userData.nickname,
                   icc: userData.icc,
@@ -101,12 +101,13 @@ export class AuthService {
                   area: userData.area,
                   level: userData.level,
                   language: userData.language,
-                  country_code: userData.country_code,
+                  country_code: '',
                   password: hashedPassword, 
               });
 
               delete accountKeys[userData.guid];
           }
+          loginResponse.data.country_code = '';
           return loginResponse;
       } catch (error) {
           console.error('External API login error:', error);
