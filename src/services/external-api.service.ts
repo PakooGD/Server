@@ -49,7 +49,7 @@ export class ExternalApiService {
     const response = await axios.get('https://dservice.xa.com/api/equipment/device/lists', {
       headers: headers,
     });
-    return response;
+    return response.data;
   }
 
   static async RedirectSearch(endpoint:string, headers:any,params:any): Promise<any> {
