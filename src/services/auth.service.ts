@@ -1,11 +1,8 @@
 import { User } from '../models/user.model';
-import axios from 'axios';
 import { ExternalApiService } from './';
 import { Op } from 'sequelize';
 import { LoginData } from '../types/ITypes';
 import { TokenService } from './token.service';
-import { error } from 'console';
-import { whitelist } from 'validator';
 
 const bcrypt = require('bcrypt');
 
@@ -41,185 +38,112 @@ export class AuthService {
   }
 
   static async login(headers: any, loginData: LoginData) {
-      const { phone, password, icc } = loginData;
-        
-      const existingUser = await User.findOne({
-          where: {
-              [Op.or]: [
-                  { phone },
-                  { mobile: phone },
-              ],
-          },
-      });
-  
-      if (existingUser) {
-        const isPasswordValid = await bcrypt.compare(password, existingUser.password);
+      try {
+        const { phone, password, icc } = loginData;
+        const user = await User.findOne({ where: {[Op.or]: [{ phone }, { mobile: phone }]} });
+    
+        if (user) {
+          const isPasswordValid = await bcrypt.compare(password, user.password);
+          if (!isPasswordValid) throw new Error(`Invalid password`);
 
-        if (!isPasswordValid) {
           return {
-              data: null,
-              message: 'Invalid password',
-              status: 401,
+              data: this.formatUserResponse(user),
+              message: 'success',
+              status: 200,
           };
         }
-        return {
-            data: this.formatUserResponse(existingUser),
-            message: 'success',
-            status: 200,
-        };
-      }
-  
-      try {
-          const loginResponse = await ExternalApiService.login(headers, phone, password, icc);
-  
-          if (loginResponse.status === 200) {
-              const userData = loginResponse.data;
-              
-              const hashedPassword = await bcrypt.hash(password, 10);
-              
-              await User.create({
-                  whitelist: false,
-                  guid: userData.guid,
-                  account_key: accountKeys[userData.guid],
-                  name: userData.name,
-                  nickname: userData.nickname,
-                  icc: userData.icc,
-                  mobile: userData.mobile,
-                  phone: userData.phone,
-                  intro: userData.intro,
-                  username: userData.username,
-                  token: userData.token,
-                  access_token: userData.access_token,
-                  expire_in: userData.expire_in,
-                  refresh_token: userData.refresh_token,
-                  refresh_token_expire_in: userData.refresh_token_expire_in,
-                  identity: userData.identity,
-                  wechat_bind: userData.wechat_bind,
-                  real_name: userData.real_name,
-                  gender: userData.gender,
-                  avatar: userData.avatar,
-                  area: userData.area,
-                  level: userData.level,
-                  language: userData.language,
-                  country_code: " ",
-                  password: hashedPassword, 
-              });
 
-              delete accountKeys[userData.guid];
-          }
-          return loginResponse;
+        const result = await ExternalApiService.login(headers, phone, password, icc);
+
+        await User.create({
+            whitelist: false,
+            guid: result.data.guid,
+            account_key: accountKeys[result.data.guid], 
+            name: result.data.name,
+            nickname: result.data.nickname,
+            icc: result.data.icc,
+            mobile: result.data.mobile,
+            phone: result.data.phone,
+            intro: result.data.intro,
+            username: result.data.username,
+            token: result.data.token,
+            access_token: result.data.access_token,
+            expire_in: result.data.expire_in,
+            refresh_token: result.data.refresh_token,
+            refresh_token_expire_in: result.data.refresh_token_expire_in,
+            identity: result.data.identity,
+            wechat_bind: result.data.wechat_bind,
+            real_name: result.data.real_name,
+            gender: result.data.gender,
+            avatar: result.data.avatar,
+            area: result.data.area,
+            level: result.data.level,
+            language: result.data.language,
+            country_code: result.data.country_code,
+            password: await bcrypt.hash(password, 10), 
+        });
+        delete accountKeys[result.data.guid];
+
+        return result;
       } catch (error) {
-          console.error('External API login error:', error);
-          throw new Error('External API login error');
+          throw new Error(`External API login error: ${error}`);
       }
   }
 
   static async register(loginData: any) {
     try {
-        const existingUser = await User.findOne({
-          where: {
-              [Op.or]: [
-                  { token: loginData.headers.token },
-              ],
-          },
-        });
+      const token = loginData.headers.token;
+      const user = await User.findOne({ where: { token } });
+ 
+      if (user) {
+        TokenService.VerifyAndUpdateUserToken(user)
+        return {
+            "success": false,
+            "data": null,
+            "message": "注册id不能为空",
+            "status": 1017
+        };
+      }
 
-        if (existingUser) {
-            if(!TokenService.verifyToken(existingUser.expire_in)){
-              const result = await TokenService.refreshToken(existingUser.refresh_token_expire_in)
-              if(result != null){
-                await existingUser.update({
-                  access_token: result.access_token,
-                  refresh_token: result.refresh_token,
-                  expire_in: result.expire_in,
-                  refresh_token_expire_in: result.refresh_token_expire_in,
-                });
-              } 
-            }
-            return {
-              "success": false,
-              "data": null,
-              "message": "注册id不能为空",
-              "status": 1017
-            };
-        }
-
-        return await ExternalApiService.register(
-          loginData.headers,
-          loginData.alias,
-          loginData.app,
-          loginData.app_id,
-          loginData.platform,
-          loginData.registration_id,
-          loginData.tags,
-          loginData.version
-        );
+      return await ExternalApiService.register(loginData);
+      
     } catch (error) {
-      console.error('Registration error:', error);
-      throw new Error('Registration error');
+      throw new Error(`Registration error:${error}`);
     }
   }
 
   static async getUserSettings(headers:any) {
     try {
-      const existingUser = await User.findOne({
-        where: {
-            [Op.or]: [
-                { token: headers.token },
-            ],
-        },
-      });
+      const token = headers.token;
+      const user = await User.findOne({ where: { token } });
 
-      if (existingUser) {
-        if(!TokenService.verifyToken(existingUser.expire_in)){
-          const result = await TokenService.refreshToken(existingUser.refresh_token_expire_in)
-          if(result != null){
-            await existingUser.update({
-              access_token: result.access_token,
-              refresh_token: result.refresh_token,
-              expire_in: result.expire_in,
-              refresh_token_expire_in: result.refresh_token_expire_in,
-            });
-          } 
-        }
+      if (user) {
+        TokenService.VerifyAndUpdateUserToken(user)
         return {
           "data": null,
           "message": "success",
           "status": 200
         };
       }
-      const result = await ExternalApiService.getUserSettings(headers);
 
-      return result;
+      return await ExternalApiService.getUserSettings(headers);
     } catch (error) {
-      console.error('Getting settings error:', error);
-      throw new Error('Getting settings error');
+      throw new Error(`Getting settings error:${error}`);
     }
   }
 
   static async Route(headers:any, query: any) {
     try {
       const accountKey = query.account_key;
-      if (!accountKey) {
-        return {
-          data: null,
-          message: 'Account key is required',
-          status: 400,
-        };
-      }
+      if (!accountKey) throw new Error('Account key is required');
 
-      const existingUser = await User.findOne({
-        where: {
-          account_key: accountKey,
-        },
-      });
-
+      const existingUser = await User.findOne({ where: { account_key: accountKey } });
       if (existingUser) {
         return {
           data: {
             user_guid: existingUser.guid,
             account_key: existingUser.account_key,
-            country_code: " ",
+            country_code: existingUser.country_code,
             endpoint: existingUser.area,
             is_migrate: false,
             tip_status: 0
@@ -233,51 +157,20 @@ export class AuthService {
       accountKeys[result.data.user_guid.toString()] = accountKey;
 
       return result;
-
     } catch (error) {
-      console.error('Routing error:', error);
-      throw new Error('Routing error');
+      throw new Error(`Routing error: ${error}`);
     }
   }
 
   static async GetPaging(headers:any) {
     try {
-      // const response = await axios.get(``, { headers });
-
       return {
         message: "No Fly Zones Are Anvailiable.",
         status: 200,
         data: null
       };
-
-      /*
-      DATA TYPE
-      {
-          recordCount: 0,
-          pageCount: 0,
-          data: [{
-            "id": 235,
-            "title": "Gu-Lian Airport",
-            "transfer": 2,
-            "country": "CN",
-            "city_name": "Mohe",
-            "center": "{\"lat\":52.91700845,\"lng\":122.42307965,\"radius\":4829.625}",
-            "shape": "{\"type\":1,\"data\":[{\"lat\":52.89319,\"lng\":122.4494487},{\"lat\":52.8916141,\"lng\":122.4421174},{\"lat\":52.8912361,\"lng\":122.4343602},{\"lat\":52.8920819,\"lng\":122.4267049},{\"lat\":52.8965733,\"lng\":122.4146218},{\"lat\":52.9121948,\"lng\":122.3890928},{\"lat\":52.91594,\"lng\":122.3843964},{\"lat\":52.9202905,\"lng\":122.3814668},{\"lat\":52.9249499,\"lng\":122.3805041},{\"lat\":52.9332593,\"lng\":122.383988},{\"lat\":52.9402537,\"lng\":122.3725436},{\"lat\":52.9478259,\"lng\":122.3853041},{\"lat\":52.9408288,\"lng\":122.3967325},{\"lat\":52.9424061,\"lng\":122.4040713},{\"lat\":52.9427845,\"lng\":122.4118376},{\"lat\":52.9419383,\"lng\":122.4195017},{\"lat\":52.9374392,\"lng\":122.4316026},{\"lat\":52.9218188,\"lng\":122.4571144},{\"lat\":52.918071,\"lng\":122.4618059},{\"lat\":52.9137188,\"lng\":122.464728},{\"lat\":52.9090587,\"lng\":122.4656821},{\"lat\":52.900761,\"lng\":122.4621941},{\"lat\":52.8937657,\"lng\":122.4736157},{\"lat\":52.886191,\"lng\":122.4608754},{\"lat\":52.89319,\"lng\":122.4494487}]}",
-            "raw": null,
-            "display": 1,
-            "type": 1,
-            "raw_from": 2,
-            "lat": 52.91700845,
-            "lng": 122.42307965,
-            "radius": 4829
-          }],
-          version: 0,
-        },
-      */
-
     } catch (error) {
-      console.error('Paging error:', error);
-      throw new Error('Paging error');
+      throw new Error(`Paging error: ${error}`);
     }
   }
 }

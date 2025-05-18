@@ -3,60 +3,53 @@ import { LoginResponse } from '../types/ITypes';
 
 export class ExternalApiService {
   static async login(headers:any, phone: string, password: string, icc: string): Promise<LoginResponse> {
-    const response = await axios.post(`https://passport.xag.cn/api/account/v1/user/token/login`, {
-      phone,
-      password,
-      icc,
-    }, {
-      headers: headers,
-    });
+    const response = await axios.post(
+      `https://passport.xag.cn/api/account/v1/user/token/login`, 
+      { phone, password, icc }, 
+      { headers: headers }
+    );
     return response.data;
   }
 
-  static async register(headers:any, alias:any, app:any, app_id:any, platform:any, registration_id:any, tags:any, version:any): Promise<any> {
-    const response = await axios.post(`https://message.xa.com/api/message/v1/jpush/relation/register`, {
-      alias,
-      app,
-      app_id,
-      platform,
-      registration_id,
-      tags,
-      version
-    }, {
-      headers: {
-        ...headers,
-        host: 'message.xa.com'
-      },
-    });
+  static async register(logingData: any): Promise<any> {
+    const { headers, alias, app, app_id, platform, registration_id, tags, version } = logingData;
+    const response = await axios.post(
+      `https://message.xa.com/api/message/v1/jpush/relation/register`,
+      { alias, app, app_id, platform, registration_id, tags, version },
+      { headers }
+    );
     return response.data;
   }
 
   static async getUserSettings(headers:any): Promise<any> {
-    const response = await axios.post(`https://passport.xag.cn/api/account/v1/common/user/setting/get`, {
-      headers: headers,
-    });
+    const response = await axios.post(
+      `https://passport.xag.cn/api/account/v1/common/user/setting/get`, 
+      { headers: headers }
+    );
     return response.data;
   }
 
   static async Route(headers:any,accountKey:any): Promise<any> {
-    const response = await axios.get(`https://passport.xag.cn/api/account/v1/common/user/route?account_key=${accountKey}`, {
-      headers: headers,
-    });
+    const response = await axios.get(
+      `https://passport.xag.cn/api/account/v1/common/user/route?account_key=${accountKey}`, 
+      { headers: headers }
+    );
     return response.data;
   }
 
   static async GetDeviceLists(headers:any): Promise<any> {
-    const response = await axios.get('https://dservice.xa.com/api/equipment/device/lists', {
-      headers: headers,
-    });
+    const response = await axios.get(
+      'https://dservice.xa.com/api/equipment/device/lists', 
+      { headers: headers }
+    );
     return response.data;
   }
 
   static async RedirectSearch(endpoint:string, headers:any,params:any): Promise<any> {
-    const response = await axios.get(`https://dservice.xa.com${endpoint}`, {
-      headers: headers,
-      params
-    });
+    const response = await axios.get(
+      `https://dservice.xa.com${endpoint}`, 
+      { headers: headers, params }
+    );
     return response.data;
   }
 }

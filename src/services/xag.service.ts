@@ -1,7 +1,6 @@
 // src/services/xag.service.ts
 import { User } from '../models/user.model';
 import { Device } from '../models/device.model';
-import axios, { AxiosError } from 'axios';
 import { TokenService } from './token.service';
 import { ExternalApiService } from './'
 
@@ -9,36 +8,14 @@ export class XagService {
   static async getDeviceLists(headers: any) {
     try {
       const token = headers.token;
+      
       const user = await User.findOne({ where: { token } });
+      if (!user) throw new Error('User not found');
 
-      if (!user) {
-        throw new Error('User not found');
-      }
+      TokenService.VerifyAndUpdateUserToken(user)
 
-      if (!TokenService.verifyToken(user.expire_in)) {
-        // Try to refresh the token
-        const result = await TokenService.refreshToken(user.refresh_token_expire_in);
-        if (result != null) {
-          // Update the user with the new token information
-          await user.update({
-            access_token: result.access_token,
-            refresh_token: result.refresh_token,
-            expire_in: result.expire_in,
-            refresh_token_expire_in: result.refresh_token_expire_in,
-          });
-        } else {
-          return {
-            status: 401,
-            message: 'Token expired and refresh failed',
-            data: null,
-          };
-        }
-      }
-
-      const devices = await Device.findAll({
-        where: { user_id: user.id },
-      });
-
+      // Try find in database
+      const devices = await Device.findAll({ where: { user_id: user.id } });
       if (devices && devices.length > 0) {
         const result = {
           "status": 200,
@@ -51,50 +28,35 @@ export class XagService {
             })
           },
         };
-        console.log(JSON.stringify(result))
         return result
       }
 
+      // Or get from Chinese server
       const result = await ExternalApiService.GetDeviceLists(headers)
-
-      if (!result) throw new Error('Invalid API response structure');
-      
       const deviceLists = result.data?.lists;
-
       if (deviceLists && Array.isArray(deviceLists)) {
         await Promise.all(
           deviceLists.map(async (deviceData: any) => {
-            deviceData.country_code = " "
-            try {
-              await Device.upsert({
-                ...deviceData,
-                user_id: user.id,
-              });
-            } catch (upsertError) {
-              console.log('Failed to upsert device:', upsertError)
-              console.error('Failed to upsert device:', upsertError);
-            }
+            deviceData.model = "ACS2_21" // hardcoded replacement for drone
+            await Device.upsert({
+              ...deviceData,
+              user_id: user.id,
+            });
           })
         );
-      } else {
-        console.log('No devices available')
-        throw new Error('No devices available');
-      }
+      } 
+
       return result;
-      
     } catch (error) {
-      console.error('getting devices error:', error);
-      throw new Error('Failed to get devices');
+      throw new Error(`Failed to get devices: ${error}`);
     }
   }
 
   static async RedirectSearch(endpoint: string, headers: any, params: any): Promise<any> {
     try {
       return await ExternalApiService.RedirectSearch(endpoint, headers, params)
-
     } catch (error) {
-      console.error('Forwarding error:', error);
-      throw new Error('Failed to fetch info');
+      throw new Error(`Failed to fetch info: ${error}`);
     }
   }
 
@@ -102,27 +64,9 @@ export class XagService {
     try {
       const token = headers.token;
       const user = await User.findOne({ where: { token } });
-      if (!user) {
-        throw new Error('User not found');
-      }
+      if (!user)  throw new Error('User not found');
 
-      if (!TokenService.verifyToken(user.expire_in)) {
-        const result = await TokenService.refreshToken(user.refresh_token_expire_in);
-        if (result != null) {
-          // Update the user with the new token information
-          await user.update({
-            access_token: result.access_token,
-            refresh_token: result.refresh_token,
-            expire_in: result.expire_in,
-            refresh_token_expire_in: result.refresh_token_expire_in,
-          });
-        } else {
-          return {
-            status: 401,
-            message: 'Token expired and refresh failed',
-          };
-        }
-      }
+      TokenService.VerifyAndUpdateUserToken(user)
 
       const device = await Device.findOne({
           where: {
@@ -141,8 +85,7 @@ export class XagService {
       };
 
     } catch (error) {
-      console.error('Deleting device error:', error);
-      throw new Error('Failed to delete device');
+      throw new Error(`Failed to delete device: ${error}`);
     }
   }
 

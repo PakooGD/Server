@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { User } from '../models/user.model';
 
 export class TokenService {
   static async refreshToken(refreshTokenExpiration:any) {
@@ -12,6 +13,26 @@ export class TokenService {
         console.error('Token refresh failed:', error);
     }
   }
+
+  static async VerifyAndUpdateUserToken(user:any) {
+    try {
+      if (!TokenService.verifyToken(user.expire_in)) {
+        const result = await TokenService.refreshToken(user.refresh_token_expire_in);
+
+        if(!result) throw new Error('Token expired and refresh failed');
+
+        await user.update({
+          access_token: result.access_token,
+          refresh_token: result.refresh_token,
+          expire_in: result.expire_in,
+          refresh_token_expire_in: result.refresh_token_expire_in,
+        });
+      }
+    } catch (error) {
+      throw new Error('Token expired and refresh failed');
+    }
+  }
+
 
   private static async createTokens() {
     return {
