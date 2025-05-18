@@ -11,6 +11,7 @@ export class XagController {
         try {
             console.log(req.headers)
             const headers = { ...req.headers };
+            headers.host = 'dservice.xa.com'
             const result = await XagService.getDeviceLists(headers);
             console.log(JSON.stringify(result))
             res.status(200).json(result);
@@ -37,6 +38,7 @@ export class XagController {
             }
 
             const headers = { ...req.headers };
+            headers.host = 'dservice.xa.com'
             const result = await XagService.RedirectSearch('/api/equipment/device/searchInfo', headers, req.query);
             console.log(JSON.stringify(result))
             if (result.data) {
@@ -81,6 +83,7 @@ export class XagController {
             }
 
             const headers = { ...req.headers };
+            headers.host = 'dservice.xa.com'
             const result = await XagService.RedirectSearch('/api/equipment/device/searchStatus', headers, req.query);
             
             if (result.data) {

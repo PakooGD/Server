@@ -10,6 +10,7 @@ export class AuthController {
   static async Route(req: Request, res: Response): Promise<void> {
     try {
       const headers = { ...req.headers };
+      headers.host = 'passport.xag.cn'
       const query = req.query
       const result = await AuthService.Route(headers, query);
       console.log(JSON.stringify(result))
@@ -51,6 +52,7 @@ export class AuthController {
       }
 
       const headers = { ...req.headers };
+      headers.host = 'passport.xag.cn'
       const result = await AuthService.login(headers, { phone, password, icc });
       console.log(JSON.stringify(result))
       AuthController.sendResponse(res, result);
@@ -68,6 +70,7 @@ export class AuthController {
       const { alias, app, app_id, platform, registration_id, tags, version } = req.body;
 
       const headers = { ...req.headers };
+      headers.host = 'message.xa.com'
       const result = await AuthService.register({ 
         headers,
         alias, 
@@ -92,6 +95,7 @@ export class AuthController {
   static async Setting(req: Request, res: Response): Promise<void> {
     try {
       const headers = { ...req.headers };
+      headers.host = 'passport.xag.cn'
       const result = await AuthService.getUserSettings(headers);
       console.log(JSON.stringify(result))
       AuthController.sendResponse(res, result);
