@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Routes
-app.use('/api', xagRoutes);
+app.use('/', xagRoutes);
 
 // Error handling
 app.use(errorHandler);
