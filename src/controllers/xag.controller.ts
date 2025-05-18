@@ -7,10 +7,12 @@ const deviceStatusCache: Record<string, any> = {};
 
 export class XagController {
     static async getDeviceLists(req: Request, res: Response): Promise<void> {
+        console.log("getDeviceLists")
         try {
+            console.log(req.headers)
             const headers = { ...req.headers };
             const result = await XagService.getDeviceLists(headers);
-            
+            console.log(JSON.stringify(result))
             res.status(200).json(result);
 
         } catch (error) {
@@ -188,3 +190,5 @@ export class XagController {
         }
     }
 }
+
+
