@@ -71,16 +71,13 @@ export class ExternalApiService {
   }
 
   static async RedirectSearch(endpoint:string, headers:any,params:any): Promise<any> {
-    const response = await axios.get(
-      `https://dservice.xa.com${endpoint}`, 
-      { 
-        headers: {
-          ...headers,
-          host: 'dservice.xa.com'
-        },
-        params
-      }
-    );
+    const response = await axios.get(`https://dservice.xa.com${endpoint}`, {
+      headers: {
+        ...headers,
+        host: 'dservice.xa.com'
+      },
+      params
+    });
     return response.data;
   }
 }
