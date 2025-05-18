@@ -30,12 +30,10 @@ export class XagController {
 
             console.log(JSON.stringify(result))
 
-            if (result.data) {
-                result.data.new_link = true; // hardcoded to add any serial numbers to any accounts
-                result.data.model = "ACS2_21"// Should be hardcoded coz leads to crash if == UAV27
-                deviceStatusCache[serial_number.toString()] = result.data;
-            }
-            
+            result.data.new_link = true; // hardcoded to add any serial numbers to any accounts
+            result.data.model = "ACS2_21"// Should be hardcoded coz leads to crash if == UAV27
+            deviceStatusCache[serial_number.toString()] = result.data;
+
             res.json(result);
         } catch (error) {
             console.error('Device search info error:', error);
