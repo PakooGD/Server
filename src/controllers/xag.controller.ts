@@ -54,7 +54,7 @@ export class XagController {
                         "name":result.data.name,
                         "model":result.data.model,
                         "model_name":result.data.model_name,
-                        "country_code":""
+                        "country_code":" "
                     }
                 }
                 console.log(JSON.stringify(resu))
@@ -127,7 +127,7 @@ export class XagController {
                 dev_id: statusData.dev_id || "Nothing",
                 model: statusData.model || "Nothing",
                 model_name: statusData.model_name || "Nothing",
-                country_code: statusData.country_code || "",
+                country_code: " ",
                 attribution_area: statusData.attribution_area || 1,
                 remote_id: statusData.remote_id || "",
                 enroll: statusData.enroll || -1,
@@ -193,5 +193,4 @@ export class XagController {
         }
     }
 }
-
 
