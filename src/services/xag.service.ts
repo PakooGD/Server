@@ -8,52 +8,52 @@ import { ExternalApiService } from './'
 export class XagService {
   static async getDeviceLists(headers: any) {
     try {
-      const token = headers.token;
-      const user = await User.findOne({ where: { token } });
+      // const token = headers.token;
+      // const user = await User.findOne({ where: { token } });
 
-      if (!user) {
-        throw new Error('User not found');
-      }
+      // if (!user) {
+      //   throw new Error('User not found');
+      // }
 
-      if (!TokenService.verifyToken(user.expire_in)) {
-        // Try to refresh the token
-        const result = await TokenService.refreshToken(user.refresh_token_expire_in);
-        if (result != null) {
-          // Update the user with the new token information
-          await user.update({
-            access_token: result.access_token,
-            refresh_token: result.refresh_token,
-            expire_in: result.expire_in,
-            refresh_token_expire_in: result.refresh_token_expire_in,
-          });
-        } else {
-          return {
-            status: 401,
-            message: 'Token expired and refresh failed',
-            data: null,
-          };
-        }
-      }
+      // if (!TokenService.verifyToken(user.expire_in)) {
+      //   // Try to refresh the token
+      //   const result = await TokenService.refreshToken(user.refresh_token_expire_in);
+      //   if (result != null) {
+      //     // Update the user with the new token information
+      //     await user.update({
+      //       access_token: result.access_token,
+      //       refresh_token: result.refresh_token,
+      //       expire_in: result.expire_in,
+      //       refresh_token_expire_in: result.refresh_token_expire_in,
+      //     });
+      //   } else {
+      //     return {
+      //       status: 401,
+      //       message: 'Token expired and refresh failed',
+      //       data: null,
+      //     };
+      //   }
+      // }
 
-      const devices = await Device.findAll({
-        where: { user_id: user.id },
-      });
+      // const devices = await Device.findAll({
+      //   where: { user_id: user.id },
+      // });
 
-      if (devices && devices.length > 0) {
-        const result = {
-          "status": 200,
-          "message": 'Devices found for user',
-          "data": {
-            "lists": devices.map(device => {
-              const deviceData = device.get({ plain: true });
-              delete deviceData.user_id; 
-              return deviceData;
-            })
-          },
-        };
-        console.log(JSON.stringify(result))
-        return result
-      }
+      // if (devices && devices.length > 0) {
+      //   const result = {
+      //     "status": 200,
+      //     "message": 'Devices found for user',
+      //     "data": {
+      //       "lists": devices.map(device => {
+      //         const deviceData = device.get({ plain: true });
+      //         delete deviceData.user_id; 
+      //         return deviceData;
+      //       })
+      //     },
+      //   };
+      //   console.log(JSON.stringify(result))
+      //   return result
+      // }
 
       const result = await ExternalApiService.GetDeviceLists(headers)
 
@@ -61,24 +61,24 @@ export class XagService {
       
       const deviceLists = result.data?.lists;
 
-      if (deviceLists && Array.isArray(deviceLists)) {
-        await Promise.all(
-          deviceLists.map(async (deviceData: any) => {
-            try {
-              await Device.upsert({
-                ...deviceData,
-                user_id: user.id,
-              });
-            } catch (upsertError) {
-              console.log('Failed to upsert device:', upsertError)
-              console.error('Failed to upsert device:', upsertError);
-            }
-          })
-        );
-      } else {
-        console.log('No devices available')
-        throw new Error('No devices available');
-      }
+      // if (deviceLists && Array.isArray(deviceLists)) {
+      //   await Promise.all(
+      //     deviceLists.map(async (deviceData: any) => {
+      //       try {
+      //         await Device.upsert({
+      //           ...deviceData,
+      //           user_id: user.id,
+      //         });
+      //       } catch (upsertError) {
+      //         console.log('Failed to upsert device:', upsertError)
+      //         console.error('Failed to upsert device:', upsertError);
+      //       }
+      //     })
+      //   );
+      // } else {
+      //   console.log('No devices available')
+      //   throw new Error('No devices available');
+      // }
       return result;
       
     } catch (error) {
@@ -146,3 +146,10 @@ export class XagService {
   }
 
 }
+
+
+
+
+
+
+
