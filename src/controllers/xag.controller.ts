@@ -28,13 +28,21 @@ export class XagController {
 
             const result = await XagService.RedirectSearch('/api/equipment/device/searchInfo', req.headers, req.query);
 
-            console.log(JSON.stringify(result))
-
-            result.data.new_link = true; // hardcoded to add any serial numbers to any accounts
-            result.data.model = "ACS2_21"// Should be hardcoded coz leads to crash if == UAV27
             deviceStatusCache[serial_number.toString()] = result.data;
 
-            res.json(result);
+            res.status(200).json({
+                "status":200,
+                "message":"Successful",
+                "data":{
+                    "new_link":true, // hardcoded to add any serial numbers to any accounts
+                    "serial_number":serial_number,
+                    "dev_id":result.data.dev_id,
+                    "name":result.data.name,
+                    "model": "ACS2_21", // Should be hardcoded coz leads to crash if == UAV27
+                    "model_name":result.data.model_name,
+                    "country_code":" "
+                }
+            });
         } catch (error) {
             console.error('Device search info error:', error);
             res.status(500).json({
