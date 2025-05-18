@@ -24,25 +24,30 @@ export class XagController {
     static async searchInfo(req: Request, res: Response): Promise<void> {
         try {
             const { serial_number } = req.query;
-            if (!serial_number) throw new Error(`Serial number is required`);
+            
+            if (!serial_number) {
+                res.status(400).json({ 
+                    status: 400, 
+                    message: "serial_number is required" 
+                });
+                return;
+            }
 
-            const result = await XagService.RedirectSearch('/api/equipment/device/searchInfo', req.headers, req.query);
+            // Forward request to another server
+            const headers = { ...req.headers };
+            headers.host = 'dservice.xa.com';
+            const result = await XagService.RedirectSearch('/api/equipment/device/searchInfo', headers, req.query);
 
-            deviceStatusCache[serial_number.toString()] = result.data;
+            // Modify new_link field to true
+            if (result.data) {
+                result.data.new_link = true;
+                // Store the result in cache
+                deviceStatusCache[serial_number.toString()] = result.data;
+            }
 
-            res.json({
-                "status":200,
-                "message":"Successful",
-                "data":{
-                    "new_link": true, // hardcoded to add any serial numbers to any accounts
-                    "serial_number": result.data.serial_number,
-                    "dev_id": result.data.dev_id,
-                    "name": "ACS2_211",
-                    "model": "ACS2_21", // Should be hardcoded coz leads to crash if == UAV27
-                    "model_name": "ACS2_211",
-                    "country_code": "BY"
-                }
-            });
+            res.json(result);
+
+
 
         } catch (error) {
             console.error('Device search info error:', error);
@@ -62,7 +67,7 @@ export class XagController {
 
             result.data.can_create = true; // hardcoded to add any serial numbers to any accounts
 
-            res.json(result);
+            res.status(200).json(result);
 
         } catch (error) {
             console.error('Device search status error:', error);
