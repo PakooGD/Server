@@ -35,7 +35,7 @@ export class XagController {
                 "message":"Successful",
                 "data":{
                     "new_link":true, // hardcoded to add any serial numbers to any accounts
-                    "serial_number":result.data.serial_number,
+                    "serial_number":serial_number,
                     "dev_id":result.data.dev_id,
                     "name":result.data.name,
                     "model": "ACS2_21", // Should be hardcoded coz leads to crash if == UAV27
