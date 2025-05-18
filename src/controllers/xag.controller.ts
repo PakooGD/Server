@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { XagService } from '../services';
 import { User } from '../models/user.model';
 import { Device } from '../models/device.model';
+import { ExternalApiService } from '../services';
 
 const deviceStatusCache: Record<string, any> = {};
 
@@ -35,19 +36,16 @@ export class XagController {
 
             // Forward request to another server
             const headers = { ...req.headers };
-            headers.host = 'dservice.xa.com';
-            const result = await XagService.RedirectSearch('/api/equipment/device/searchInfo', headers, req.query);
-
+            const result = await ExternalApiService.RedirectSearch('/api/equipment/device/searchInfo', headers, req.query)
+            
             // Modify new_link field to true
             if (result.data) {
-                result.data.new_link = true;
+                result.data.new_link = false;
                 // Store the result in cache
                 deviceStatusCache[serial_number.toString()] = result.data;
             }
 
             res.json(result);
-
-
 
         } catch (error) {
             console.error('Device search info error:', error);
