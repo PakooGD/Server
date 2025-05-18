@@ -190,12 +190,9 @@ export class AuthService {
           "status": 200
         };
       }
+      const result = await ExternalApiService.getUserSettings(headers);
 
-      const response = await axios.get('https://passport.xag.cn/api/account/v1/common/user/setting/get', {
-        headers
-      });
-      
-      return response;
+      return result;
     } catch (error) {
       console.error('Getting settings error:', error);
       throw new Error('Getting settings error');
