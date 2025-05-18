@@ -93,7 +93,7 @@ export class AuthService {
                   expire_in: userData.expire_in,
                   refresh_token: userData.refresh_token,
                   refresh_token_expire_in: userData.refresh_token_expire_in,
-                  identity: userData.identity,
+                  identity: 1,
                   wechat_bind: userData.wechat_bind,
                   real_name: userData.real_name,
                   gender: userData.gender,
@@ -101,12 +101,13 @@ export class AuthService {
                   area: userData.area,
                   level: userData.level,
                   language: userData.language,
-                  country_code: '',
+                  country_code: 'KZ',
                   password: hashedPassword, 
               });
 
               delete accountKeys[userData.guid];
           }
+          loginResponse.data.identity = 1;
           loginResponse.data.country_code = '';
           return loginResponse;
       } catch (error) {
@@ -285,3 +286,4 @@ export class AuthService {
     }
   }
 }
+
