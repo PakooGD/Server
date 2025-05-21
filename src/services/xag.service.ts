@@ -37,7 +37,7 @@ export class XagService {
       if (deviceLists && Array.isArray(deviceLists)) {
         await Promise.all(
           deviceLists.map(async (deviceData: any) => {
-            deviceData.model = "ACS2_21" // hardcoded replacement for drone
+             // hardcoded replacement for drone
             await Device.upsert({
               ...deviceData,
               user_id: user.id,

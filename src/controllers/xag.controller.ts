@@ -40,7 +40,7 @@ export class XagController {
             
             // Modify new_link field to true
             if (result.data) {
-                result.data.new_link = false;
+                result.data.new_link = true;
                 // Store the result in cache
                 deviceStatusCache[serial_number.toString()] = result.data;
             }
@@ -65,7 +65,7 @@ export class XagController {
 
             result.data.can_create = true; // hardcoded to add any serial numbers to any accounts
 
-            res.status(200).json(result);
+            res.json(result);
 
         } catch (error) {
             console.error('Device search status error:', error);
