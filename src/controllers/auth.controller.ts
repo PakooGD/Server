@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { AuthService } from '../services';
+const crypto = require('crypto');
 
 export class AuthController {
   private static sendResponse(res: Response, result: any) {
@@ -86,7 +87,7 @@ export class AuthController {
         "status": 200,
         "message": "Successful",
         "data": {
-          "iot_user_session": generateRandomKey(86)
+          "iot_user_session": generateRandomToken()
         }
       }
       AuthController.sendResponse(res, result);
@@ -101,11 +102,8 @@ export class AuthController {
 
 }
 
-function generateRandomKey(length:any) {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
+function generateRandomToken() {
+  const part1 = Buffer.from(crypto.randomBytes(32)).toString('base64url');
+  const part2 = Buffer.from(crypto.randomBytes(32)).toString('base64url');
+  return `${part1}.${part2}`;
 }

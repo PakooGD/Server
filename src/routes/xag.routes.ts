@@ -13,6 +13,8 @@ router.post('/equipment/device/create', XagController.create);
 router.get('/account/v1/common/user/route', AuthController.Route);
 router.get('/noflyzone/api/get_paging', AuthController.GetPaging);
 router.post('/equipment/home/delete', XagController.Delete);
+router.get('api/equipment/home/getIotUserSession', AuthController.getIotSession);
+
 
 export default router;
 
