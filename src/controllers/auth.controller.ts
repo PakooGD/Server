@@ -79,5 +79,33 @@ export class AuthController {
       })
     }
   }
+
+  static async getIotSession(req: Request, res: Response): Promise<void> {
+    try {
+      const result = {
+        "status": 200,
+        "message": "Successful",
+        "data": {
+          "iot_user_session": generateRandomKey(86)
+        }
+      }
+      AuthController.sendResponse(res, result);
+    } catch (error) {
+      console.error('Settings error:', error);
+      AuthController.sendResponse(res, {
+        message: `${error}`,
+        status: 500,
+      })
+    }
+  }
+
 }
 
+function generateRandomKey(length:any) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
