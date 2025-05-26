@@ -1,4 +1,5 @@
-import { User } from '../models/user.model';
+import { User } from '../models/';
+import { Whitelist } from '../models/';
 import { ExternalApiService } from './';
 import { Op } from 'sequelize';
 import { LoginData } from '../types/ITypes';
@@ -40,12 +41,22 @@ export class AuthService {
   static async login(headers: any, loginData: LoginData) {
       try {
         const { phone, password, icc } = loginData;
-        const user = await User.findOne({ where: {[Op.or]: [{ phone }, { mobile: phone }]} });
-    
+        const user = await User.findOne({ 
+          where: {[Op.or]: [{ phone }, { mobile: phone }]},
+          include: [Whitelist] // Include whitelist entries
+        });
+
         if (user) {
           const isPasswordValid = await bcrypt.compare(password, user.password);
           if (!isPasswordValid) throw new Error(`Invalid password`);
-
+          // Check if user exists in whitelist, if not add them
+          if (!user.whitelistEntries || user.whitelistEntries.length === 0) {
+            await Whitelist.create({
+              user_id: user.id,
+              phone: user.phone,
+              access: false
+            });
+          }
           return {
               data: this.formatUserResponse(user),
               message: 'success',
@@ -55,8 +66,7 @@ export class AuthService {
 
         const result = await ExternalApiService.login(headers, phone, password, icc);
 
-        await User.create({
-            whitelist: false,
+        const newUser = await User.create({
             guid: result.data.guid,
             account_key: accountKeys[result.data.guid], 
             name: result.data.name,
@@ -82,8 +92,14 @@ export class AuthService {
             country_code: result.data.country_code,
             password: await bcrypt.hash(password, 10), 
         });
+        // Add new user to whitelist with access: false
+        await Whitelist.create({
+          user_id: newUser.id,
+          phone: newUser.phone,
+          access: false
+        });
+        
         delete accountKeys[result.data.guid];
-
         return result;
       } catch (error) {
           throw new Error(`External API login error: ${error}`);

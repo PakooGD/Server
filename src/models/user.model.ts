@@ -1,5 +1,6 @@
 import { Table, Column, Model, DataType, Unique, PrimaryKey, AutoIncrement, AllowNull, Default, HasMany  } from 'sequelize-typescript';
 import { Device } from './';
+import { Whitelist } from './';
 
 @Table({
   tableName: 'users',
@@ -12,11 +13,6 @@ export class User extends Model {
   @AutoIncrement
   @Column(DataType.INTEGER)
   id!: number;
-
-  @Default(false)
-  @AllowNull(false)
-  @Column(DataType.BOOLEAN)
-  whitelist!: boolean;
 
   @Unique
   @AllowNull(false)
@@ -117,4 +113,7 @@ export class User extends Model {
 
   @HasMany(() => Device)
   devices!: Device[];
+  
+  @HasMany(() => Whitelist)
+  whitelistEntries!: Whitelist[];
 }

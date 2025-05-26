@@ -8,11 +8,6 @@ module.exports = {
         primaryKey: true,
         autoIncrement: true,
       },
-      whitelist: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: false,
-      },
       guid: {
         type: Sequelize.STRING(64),
         allowNull: false,
