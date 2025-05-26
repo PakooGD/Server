@@ -1,6 +1,6 @@
 // src/models/device.model.ts
 import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import { User } from './user.model';
+import { User } from './';
 
 @Table({
   tableName: 'devices',
