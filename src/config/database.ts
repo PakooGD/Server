@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize-typescript';
-import { User, Device } from '../models';
+import { User, Device, Whitelist } from '../models';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -11,7 +11,7 @@ const sequelize = new Sequelize({
   password: process.env.DB_PASSWORD || 'sI728f3h0thp',
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5432'),
-  models: [User, Device],
+  models: [User, Device, Whitelist],
   define: {
     underscored: true,
     timestamps: true  
