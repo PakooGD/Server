@@ -1,6 +1,5 @@
-// src/models/device.model.ts
 import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import { User } from './';
+import { User } from './user.model';
 
 @Table({
   tableName: 'devices',
@@ -10,9 +9,17 @@ import { User } from './';
 })
 export class Device extends Model {
   @Column({
-    type: DataType.STRING(64),
+    type: DataType.INTEGER,
     primaryKey: true,
+    autoIncrement: true,
     allowNull: false,
+  })
+  id!: number;
+
+  @Column({
+    type: DataType.STRING(64),
+    allowNull: false,
+    unique: true,
   })
   serial_number!: string;
 
