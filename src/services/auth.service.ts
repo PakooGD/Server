@@ -64,6 +64,7 @@ export class AuthService {
               status: 200,
           };
         }
+        
         const result = await ExternalApiService.RedirectPost(
           req, 
           'passport.xag.cn',
@@ -127,7 +128,7 @@ export class AuthService {
       return await ExternalApiService.RedirectPost(
         req, 
         'message.xa.com',
-        'api/message/v1/jpush/relation/register'
+        'api/message/v1/jpush/relation/register',
       );
     } catch (error) {
       throw new Error(`Registration error:${error}`);

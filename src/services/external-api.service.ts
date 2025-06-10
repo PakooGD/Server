@@ -6,9 +6,9 @@ export class ExternalApiService {
     res.status(status).json({ ...result, status });
   }
   
-  public static async RedirectPost(req: any, host: string, api: string): Promise<any> {
+  public static async RedirectPost(req: any, host: string, api: string, ): Promise<any> {
     const params = req.query;
-    const headers = { ...req.headers };
+    const headers = req.headers;
     headers['Host'] = host;
   
     const url = `https://${host}/${api}`;
@@ -23,7 +23,7 @@ export class ExternalApiService {
 
   public static async RedirectGet(req: any, host:any, api:any): Promise<any> {
     const params = req.query;
-    const headers = { ...req.headers };
+    const headers = req.headers;
     headers['Host'] = host;
 
     const url = `https://${host}/${api}`;
