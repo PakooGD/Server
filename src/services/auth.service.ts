@@ -2,7 +2,6 @@ import { User } from '../models/';
 import { Whitelist } from '../models/';
 import { ExternalApiService } from './';
 import { Op } from 'sequelize';
-import { LoginData } from '../types/ITypes';
 import { TokenService } from './token.service';
 
 const bcrypt = require('bcrypt');
@@ -38,9 +37,11 @@ export class AuthService {
     };
   }
 
-  static async login(headers: any, loginData: LoginData) {
+  static async Login(req:any) {
       try {
-        const { phone, password, icc } = loginData;
+        const { phone, password, icc } = req.body;
+        if (!phone || !password || !icc)  throw new Error('Phone, password and icc are required');
+      
         const user = await User.findOne({ 
           where: {[Op.or]: [{ phone }, { mobile: phone }]},
           include: [Whitelist] // Include whitelist entries
@@ -63,8 +64,11 @@ export class AuthService {
               status: 200,
           };
         }
-
-        const result = await ExternalApiService.login(headers, phone, password, icc);
+        const result = await ExternalApiService.RedirectPost(
+          req, 
+          'passport.xag.cn',
+          'api/account/v1/user/token/login'
+        );
 
         const newUser = await User.create({
             guid: result.data.guid,
@@ -92,7 +96,7 @@ export class AuthService {
             country_code: result.data.country_code,
             password: await bcrypt.hash(password, 10), 
         });
-        // Add new user to whitelist with access: false
+        // Add new user to whitelist with 'access: false'
         await Whitelist.create({
           user_id: newUser.id,
           phone: newUser.phone,
@@ -106,9 +110,9 @@ export class AuthService {
       }
   }
 
-  static async register(loginData: any) {
+  static async Register(req: any) {
     try {
-      const token = loginData.headers.token;
+      const token = req.headers.token;
       const user = await User.findOne({ where: { token } });
  
       if (user) {
@@ -120,17 +124,19 @@ export class AuthService {
             "status": 1017
         };
       }
-
-      return await ExternalApiService.register(loginData);
-      
+      return await ExternalApiService.RedirectPost(
+        req, 
+        'message.xa.com',
+        'api/message/v1/jpush/relation/register'
+      );
     } catch (error) {
       throw new Error(`Registration error:${error}`);
     }
   }
 
-  static async getUserSettings(headers:any) {
+  static async UserSettings(req:any) {
     try {
-      const token = headers.token;
+      const token = req.headers.token;
       const user = await User.findOne({ where: { token } });
 
       if (user) {
@@ -141,16 +147,33 @@ export class AuthService {
           "status": 200
         };
       }
-
-      return await ExternalApiService.getUserSettings(headers);
+      return await ExternalApiService.RedirectGet(
+        req, 
+        'passport.xag.cn',
+        'api/account/v1/common/user/setting/get'
+      );
     } catch (error) {
       throw new Error(`Getting settings error:${error}`);
     }
   }
 
-  static async Route(headers:any, query: any) {
+  static async IotSession() {
     try {
-      const accountKey = query.account_key;
+      return {
+        "status": 200,
+        "message": "Successful",
+        "data": {
+          "iot_user_session": TokenService.generateIotToken()
+        }
+      }
+    } catch (error) {
+      throw new Error(`Getting settings error:${error}`);
+    }
+  }
+
+  static async Route(req:any) {
+    try {
+      const accountKey = req.query.account_key;
       if (!accountKey) throw new Error('Account key is required');
 
       const existingUser = await User.findOne({ where: { account_key: accountKey } });
@@ -169,7 +192,12 @@ export class AuthService {
         };
       }
 
-      const result = await ExternalApiService.Route(headers, accountKey);
+      const result = await ExternalApiService.RedirectGet(
+        req, 
+        'passport.xag.cn',
+        'api/account/v1/common/user/route'
+      );
+
       accountKeys[result.data.user_guid.toString()] = accountKey;
 
       return result;
@@ -178,10 +206,10 @@ export class AuthService {
     }
   }
 
-  static async GetPaging(headers:any) {
+  static async GetPaging() {
     try {
       return {
-        message: "No Fly Zones Are Anvailiable.",
+        message: "No Fly Zones Are Available.",
         status: 200,
         data: null
       };

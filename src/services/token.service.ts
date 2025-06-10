@@ -47,6 +47,12 @@ export class TokenService {
     return crypto.randomBytes(32).toString('hex'); // 64-char hex string
   }
 
+  public static generateIotToken(): string {
+    const part1 = Buffer.from(crypto.randomBytes(32)).toString('base64url');
+    const part2 = Buffer.from(crypto.randomBytes(32)).toString('base64url');
+    return `${part1}.${part2}`;
+  }
+
   private static getTokenExpiry(days = 30): number {
     const now = new Date();
     now.setDate(now.getDate() + days);

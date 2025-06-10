@@ -98,12 +98,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Routes
-app.use('/api', xagRoutes);
+app.use('/', xagRoutes);
 
-// Корневой маршрут
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
 
 // Error handling
 app.use(errorHandler);
