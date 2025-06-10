@@ -6,16 +6,16 @@ export class ExternalApiService {
     res.status(status).json({ ...result, status });
   }
 
-  public static async RedirectPost(req: any, host:any, api:any): Promise<any> {
+  public static async RedirectPost(req: any, url:any, api:any): Promise<any> {
     const params = req.query
-    console.log(`https://${host}/${api}`, ...req.body, ...req.headers)
+    console.log(`https://${url}/${api}`, ...req.body, ...req.headers)
     const response = await axios.post(
-      `https://${host}/${api}`, 
+      `https://${url}/${api}`, 
       { ...req.body }, 
       { 
         headers: {
           ...req.headers,
-          host: host
+          host: `${url}`
         },
         params
       }
@@ -23,14 +23,15 @@ export class ExternalApiService {
     return response.data;
   }
 
-  public static async RedirectGet(req: any, host:any, api:any): Promise<any> {
+  public static async RedirectGet(req: any, url:any, api:any): Promise<any> {
     const params = req.query
+    console.log(`https://${url}/${api}`, ...req.body, ...req.headers)
     const response = await axios.get(
-      `https://${host}/${api}`, 
+      `https://${url}/${api}`, 
       { 
         headers: {
           ...req.headers,
-          host: host
+          host: `${url}`
         },
         params
       }
