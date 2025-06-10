@@ -5,38 +5,33 @@ export class ExternalApiService {
     const status = result.status >= 100 && result.status <= 599 ? result.status : 200;
     res.status(status).json({ ...result, status });
   }
-
-  public static async RedirectPost(req: any, host:any, api:any): Promise<any> {
-    const params = req.query
-    const headers = { ...req.headers }
-    const responseData = { ...req.body }
-    const response = await axios.post(
-      `https://${host}/${api}`, 
-      responseData, 
-      { 
-        headers: {
-          headers,
-          host: host
-        },
-        params
-      }
-    );
+  
+  public static async RedirectPost(req: any, host: string, api: string): Promise<any> {
+    const params = req.query;
+    const headers = { ...req.headers };
+    headers['Host'] = host;
+  
+    const url = `https://${host}/${api}`;
+  
+    const response = await axios.post(url, req.body, {
+      headers,
+      params,
+    });
+  
     return response.data;
   }
 
   public static async RedirectGet(req: any, host:any, api:any): Promise<any> {
-    const params = req.query
-    const headers = { ...req.headers }
-    const response = await axios.get(
-      `https://${host}/${api}`, 
-      { 
-        headers: {
-          headers,
-          host: host
-        },
-        params
-      }
-    );
+    const params = req.query;
+    const headers = { ...req.headers };
+    headers['Host'] = host;
+
+    const url = `https://${host}/${api}`;
+  
+    const response = await axios.get(url, {
+      headers,
+      params,
+    });
     return response.data;
   }
 
