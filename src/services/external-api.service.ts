@@ -6,12 +6,12 @@ export class ExternalApiService {
     res.status(status).json({ ...result, status });
   }
 
-  public static async RedirectPost(req: any, host: string, api: string, ): Promise<any> {
+  public static async RedirectPost(req: any, host: string, api: string ): Promise<any> {
     const params = req.query;
     const headers = req.headers;
     headers['Host'] = host;
   
-    const url = `https://${host}/${api}`;
+    const url = `https://passport.xag.cn/${api}`;
   
     const response = await axios.post(url, req.body, {
       headers: {
@@ -28,7 +28,7 @@ export class ExternalApiService {
     const headers = req.headers;
     headers['Host'] = host;
 
-    const url = `https://${host}/${api}`;
+    const url = `https://passport.xag.cn/${api}`;
   
     const response = await axios.get(url, {
       headers: {
