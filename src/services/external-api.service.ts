@@ -8,6 +8,7 @@ export class ExternalApiService {
 
   public static async RedirectPost(req: any, host:any, api:any): Promise<any> {
     const params = req.query
+    console.log(`https://${host}/${api}`, ...req.body, ...req.headers)
     const response = await axios.post(
       `https://${host}/${api}`, 
       { ...req.body }, 
