@@ -148,6 +148,7 @@ export class AuthService {
           "status": 200
         };
       }
+      
       return await ExternalApiService.RedirectGet(
         req, 
         'passport.xag.cn',
