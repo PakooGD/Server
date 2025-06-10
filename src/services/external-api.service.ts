@@ -10,7 +10,7 @@ export class ExternalApiService {
   public static async RedirectPost(req: Request, host: string, api: string ): Promise<any> {
     const params = req.query;
     const headers = req.headers;
-    headers['Host'] = host;
+    headers.host = host;
   
     const url = `https://${host}/${api}`;
   
@@ -27,7 +27,7 @@ export class ExternalApiService {
   public static async RedirectGet(req: Request, host:any, api:any): Promise<any> {
     const params = req.query;
     const headers = req.headers;
-    headers['Host'] = host;
+    headers.host = host;
 
     const url = `https://${host}/${api}`;
   
@@ -41,3 +41,4 @@ export class ExternalApiService {
   }
 
 }
+
