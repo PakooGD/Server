@@ -42,7 +42,7 @@ router.post('flightImageParentTask/page', MapsController.FlightPage);
 
 
 
-router.post('firmware_system_api/v2.2/check_update', UpdateController.checkUpdate);
+// router.post('firmware_system_api/v2.2/check_update', UpdateController.checkUpdate);
 
 
 export default router;
