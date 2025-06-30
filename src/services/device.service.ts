@@ -65,12 +65,6 @@ export class DeviceService {
       const { serial_number } = req.query; 
       if (!serial_number) throw new Error(`Serial number is required`);
 
-      const result = await ExternalApiService.RedirectGet(
-        req, 
-        'dservice.xa.com',
-        'api/equipment/device/searchInfo'
-      );
-
       const params = req.query;
       const headers = req.headers;
       headers.host = host;
