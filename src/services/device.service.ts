@@ -67,13 +67,12 @@ export class DeviceService {
 
       const params = req.query;
       const headers = req.headers;
-      headers.host = host;
-        
-      const response = await axios.get('https://dservice.xa.com/api/equipment/device/searchInfo', {
+
+      const response = await axios.get('https://dservice.xa.com/api/equipment/device/searchInfo?serial_number=175850124D4X', {
         headers: {
           ...headers,
+          host: "dservice.xa.com"
         },
-        params,
       });
       return response.data;
   }
