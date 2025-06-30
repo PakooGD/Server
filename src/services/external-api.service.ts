@@ -14,6 +14,7 @@ export class ExternalApiService {
     const response = await axios.post(url, {...req.body}, {
       headers: {
         ...headers,
+        host: host
       },
       params,
     });
@@ -31,6 +32,7 @@ export class ExternalApiService {
     const response = await axios.get(url, {
       headers: {
         ...headers,
+        host: host
       },
       params,
     });
