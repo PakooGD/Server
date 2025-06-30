@@ -3,6 +3,7 @@ import { User } from '../models/user.model';
 import { Device } from '../models/device.model';
 import { TokenService } from './token.service';
 import { ExternalApiService } from '.'
+import axios from 'axios';
 
 const deviceStatusCache: Record<string, any> = {};
 
@@ -69,6 +70,21 @@ export class DeviceService {
         'dservice.xa.com',
         'api/equipment/device/searchInfo'
       );
+
+      const params = req.query;
+      const headers = req.headers;
+      headers.host = host;
+        
+      const response = await axios.get('https://dservice.xa.com/api/equipment/device/searchInfo', {
+        headers: {
+          ...headers,
+        },
+        params,
+      });
+      return response.data;
+  }
+
+      
       // Modify new_link field to true
       if (result.data) {
         result.data.new_link = true;
