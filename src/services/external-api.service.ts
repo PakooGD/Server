@@ -10,8 +10,7 @@ export class ExternalApiService {
     headers.host = host;
   
     const url = `https://${host}/${api}`;
-      console.log(url);
-     console.log(headers);
+
     const response = await axios.post(url, {...req.body}, {
       headers: {
         ...headers,
@@ -29,8 +28,7 @@ export class ExternalApiService {
     headers.host = host;
 
     const url = `https://${host}/${api}`;
-      console.log(url);
-     console.log(headers);
+
     const response = await axios.get(url, {
       headers: {
         ...headers,
