@@ -3,6 +3,7 @@ import { User } from '../models/user.model';
 import { Device } from '../models/device.model';
 import { TokenService } from './token.service';
 import { ExternalApiService } from '.'
+import axios from 'axios';
 
 const deviceStatusCache: Record<string, any> = {};
 
@@ -64,11 +65,27 @@ export class DeviceService {
       const { serial_number } = req.query; 
       if (!serial_number) throw new Error(`Serial number is required`);
 
+<<<<<<< HEAD
       const result = await ExternalApiService.RedirectGet(
         req, 
         'dservice.xa.com',
         'api/equipment/device/searchInfo'
       );
+=======
+      const params = req.query;
+      const headers = req.headers;
+
+      const response = await axios.get('https://dservice.xa.com/api/equipment/device/searchInfo?serial_number=175850124D4X', {
+        headers: {
+          ...headers,
+          host: "dservice.xa.com"
+        },
+      });
+      return response.data;
+  }
+
+      
+>>>>>>> 8f0dbc7ee50bc0e2f6a94ca1c8af18a4295f983a
       // Modify new_link field to true
       if (result.data) {
         result.data.new_link = true;
