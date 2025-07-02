@@ -46,6 +46,10 @@ module.exports = {
         allowNull: false,
         unique: true,
       },
+      xag_token: {
+        type: Sequelize.STRING(64),
+        allowNull: false,
+      },
       token: {
         type: Sequelize.STRING(64),
         allowNull: false,

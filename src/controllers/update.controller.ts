@@ -1,24 +1,31 @@
 import { Request, Response } from 'express';
-
-import { User } from '../models/user.model';
-import { Device } from '../models/device.model';
-import { ExternalApiService } from '../services';
+import { UpdateService } from '../services';
 
 export class UpdateController {
-    // static async checkUpdate(req: Request, res: Response): Promise<void> {
-    //     try {
-    //         const headers = { ...req.headers };
-    //         const requestData = req.body;
-    //         const result = await XagService.checkUpdate(headers,requestData,req.query);
+        static async CheckUpdate(req: Request, res: Response): Promise<void> {
+            try {
+                const result = await UpdateService.CheckUpdate(req)
+                res.json(result)
+            } catch (error) {
+                console.log('Error:', error);
+                res.status(500).json({
+                    message: `${error}`,
+                    status: 500,
+                });
+            }
+        }
 
-    //         res.json(result);
-    //     } catch (error) {
-    //         console.log('Device list error:', error);
-    //         res.status(500).json({
-    //             message: `${error}`,
-    //             status: 500,
-    //         });
-    //     }
-    // }
+        static async GetUpdate(req: Request, res: Response): Promise<void> {
+            try {
+                const result = await UpdateService.GetUpdate(req)
+                res.json(result)
+            } catch (error) {
+                console.log('Error:', error);
+                res.status(500).json({
+                    message: `${error}`,
+                    status: 500,
+                });
+            }
+        }
 }
 

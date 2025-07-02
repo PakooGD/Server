@@ -81,6 +81,7 @@ export class AuthService {
             phone: result.data.phone,
             intro: result.data.intro,
             username: result.data.username,
+            xag_token: result.data.token,
             token: result.data.token,
             access_token: result.data.access_token,
             expire_in: result.data.expire_in,

@@ -67,7 +67,7 @@ export class DeviceService {
       const result = await ExternalApiService.RedirectGet(
         req, 
         'dservice.xa.com',
-        '/api/equipment/device/searchInfo'
+        'api/equipment/device/searchInfo'
       );
       // Modify new_link field to true
       if (result.data) {
@@ -89,7 +89,7 @@ export class DeviceService {
       const result = await ExternalApiService.RedirectGet(
         req, 
         'dservice.xa.com',
-        '/api/equipment/device/searchStatus'
+        'api/equipment/device/searchStatus'
       );
 
       result.data.can_create = true; // hardcoded to add any serial numbers to any accounts

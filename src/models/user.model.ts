@@ -54,6 +54,10 @@ export class User extends Model {
 
   @AllowNull(false)
   @Column(DataType.STRING(64))
+  xag_token!: string;
+
+  @AllowNull(false)
+  @Column(DataType.STRING(64))
   token!: string;
 
   @AllowNull(false)
