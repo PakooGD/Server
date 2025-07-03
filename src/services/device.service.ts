@@ -66,7 +66,7 @@ export class DeviceService {
       if (!serial_number) throw new Error(`Serial number is required`);
 
       const params = req.query;
-      const headers = req.headers;
+      const headers = {...req.headers};
       headers['Host'] = 'dservice.xa.com'
 
       const url = `https://dservice.xa.com/api/equipment/device/searchInfo`;
