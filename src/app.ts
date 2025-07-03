@@ -11,9 +11,6 @@ dotenv.config();
 const httpPort: any = process.env.SERVER_PORT || 5000;
 const app = express();
 
-// Настройка логгера с ротацией
-
-
 // Основные middleware
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://hitech.inc',
@@ -27,26 +24,19 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Routes
 app.use('/', xagRoutes);
 
-
 // Error handling
 app.use(errorHandler);
-
-
 
 // Database sync
 sequelize.authenticate()
   .then(async () => {
 
-    app.listen(httpPort, () => {
-
-    });
-
+    app.listen(httpPort, () => {});
     // Sync models with database
     await sequelize.sync({ alter: true });
 
   })
   .catch((error) => {
-
     process.exit(1);
   });
 
