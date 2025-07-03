@@ -72,11 +72,11 @@ export class DeviceService {
       );
 
       // Modify new_link field to true
-      if (result.data) {
-        result.data.new_link = true;
-        // Store the result in cache
-        deviceStatusCache[serial_number.toString()] = result.data;
-      }
+      // if (result.data) {
+      //   result.data.new_link = true;
+      //   // Store the result in cache
+      //   deviceStatusCache[serial_number.toString()] = result.data;
+      // }
       return result;
     } catch (error) {
       throw new Error(`Failed: ${error}`);
