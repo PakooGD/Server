@@ -71,16 +71,14 @@ export class DeviceService {
       const url = `https://dservice.xa.com/api/equipment/device/searchInfo`;
   
       const response = await axios.get(url, {
-        headers,
+        headers: {
+          ...headers,
+          Host: 'dservice.xa.com'
+        },
         params,
       });
-
+          
       const result = response.data
-      // const result = await ExternalApiService.RedirectGet(
-      //   req, 
-      //   'dservice.xa.com',
-      //   'api/equipment/device/searchInfo'
-      // );
 
       // Modify new_link field to true
       if (result.data) {
