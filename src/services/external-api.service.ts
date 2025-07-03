@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Request, Response } from 'express';
+import { logger } from '../app';
 
 export class ExternalApiService {
 
@@ -25,7 +26,9 @@ export class ExternalApiService {
     headers.host = host;
 
     const url = `https://${host}/${api}`;
-
+    logger.info("Request URL:", url);
+    logger.info("Headers:", headers);
+    logger.info("params:", params);
     const response = await axios.get(url, {
       headers,
       params,

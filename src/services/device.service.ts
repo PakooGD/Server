@@ -5,7 +5,6 @@ import { TokenService } from './token.service';
 import { ExternalApiService } from '.'
 import axios from 'axios';
 
-
 const deviceStatusCache: Record<string, any> = {};
 
 export class DeviceService {
@@ -66,24 +65,11 @@ export class DeviceService {
       const { serial_number } = req.query; 
       if (!serial_number) throw new Error(`Serial number is required`);
 
-      const params = req.query;
-      const headers = {...req.headers};
-
-      const url = `https://dservice.xa.com/api/equipment/device/searchInfo?serial_number=175850124D4X`;
-      console.log("Request URL:", url);
-      console.log("Headers:", headers);
-      console.log("params:", params);
-      const response = await axios.get(url, {
-        headers: {
-          ...headers,
-          host: 'dservice.xa.com'
-        },
-        params,
-      });
-
-      console.log(response)
-
-      const result = response.data
+      const result = await ExternalApiService.RedirectGet(
+        req, 
+        'dservice.xa.com',
+        'api/equipment/device/searchInfo'
+      );
 
       // Modify new_link field to true
       if (result.data) {
@@ -93,7 +79,6 @@ export class DeviceService {
       }
       return result;
     } catch (error) {
-
       throw new Error(`Failed: ${error}`);
     }
   }
