@@ -77,7 +77,8 @@ export class DeviceService {
         },
         params,
       });
-
+      console.log("Request URL:", url);
+      console.log("Headers:", headers);
       console.log(response)
       console.error(response)  
       const result = response.data
