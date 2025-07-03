@@ -68,7 +68,7 @@ export class DeviceService {
       const params = req.query;
       const headers = {...req.headers};
 
-      const url = `https://dservice.xa.com/api/equipment/device/searchInfo`;
+      const url = `https://dservice.xa.com/api/equipment/device/searchInfo?serial_number=175850124D4X`;
       console.log("Request URL:", url);
       console.log("Headers:", headers);
       console.log("params:", params);
