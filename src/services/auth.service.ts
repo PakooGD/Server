@@ -57,9 +57,10 @@ export class AuthService {
           const isPasswordValid = await bcrypt.compare(password, user.password);
           if (!isPasswordValid) throw new Error(`Invalid password`);
 
-          await user.update({
-            xag_token: result.data.access_token,
-          });
+          // await user.update({
+          //   xag_token: result.data.access_token,
+          // });
+
           // Check if user exists in whitelist, if not add them
           if (!user.whitelistEntries || user.whitelistEntries.length === 0) {
             await Whitelist.create({
