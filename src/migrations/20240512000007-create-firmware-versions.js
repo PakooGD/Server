@@ -2,40 +2,28 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('updates', {
+    await queryInterface.createTable('firmware_versions', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      app_name: {
-        type: Sequelize.STRING,
-        allowNull: false
+      firmware_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'firmwares',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
-      app_type: {
+      version_code: {
         type: Sequelize.INTEGER,
         allowNull: false
       },
-      app_uuid: {
-        type: Sequelize.UUID,
-        allowNull: false
-      },
-      app_version_uuid: {
-        type: Sequelize.UUID,
-        allowNull: false
-      },
-      dependence_version_code: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        defaultValue: 0
-      },
-      dependence_version_uuid: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        defaultValue: ''
-      },
-      display_name: {
+      version_name: {
         type: Sequelize.STRING,
         allowNull: false
       },
@@ -55,10 +43,6 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      group_name: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
       lowest_available_version_code: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -68,10 +52,6 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
         defaultValue: ''
-      },
-      pkg_name: {
-        type: Sequelize.STRING,
-        allowNull: false
       },
       release_note: {
         type: Sequelize.TEXT,
@@ -86,22 +66,23 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false
       },
-      version_code: {
-        type: Sequelize.INTEGER,
+      app_uuid: {
+        type: Sequelize.UUID,
         allowNull: false
       },
-      version_name: {
-        type: Sequelize.STRING,
+      app_version_uuid: {
+        type: Sequelize.UUID,
         allowNull: false
       },
-      user_id: {
+      dependence_version_code: {
         type: Sequelize.INTEGER,
-        references: {
-          model: 'users',
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
+        allowNull: false,
+        defaultValue: 0
+      },
+      dependence_version_uuid: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        defaultValue: ''
       },
       createdAt: {
         allowNull: false,
@@ -113,15 +94,18 @@ module.exports = {
       }
     });
 
-    // Добавляем индексы для часто используемых полей
-    await queryInterface.addIndex('updates', ['app_name']);
-    await queryInterface.addIndex('updates', ['pkg_name']);
-    await queryInterface.addIndex('updates', ['version_code']);
-    await queryInterface.addIndex('updates', ['app_uuid']);
-    await queryInterface.addIndex('updates', ['app_version_uuid']);
+    await queryInterface.addIndex('firmware_versions', ['firmware_id']);
+    await queryInterface.addIndex('firmware_versions', ['version_code']);
+    await queryInterface.addIndex('firmware_versions', ['app_uuid']);
+    await queryInterface.addIndex('firmware_versions', ['app_version_uuid']);
+    await queryInterface.addConstraint('firmware_versions', {
+      fields: ['firmware_id', 'version_code'],
+      type: 'unique',
+      name: 'unique_app_version'
+    });
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('updates');
+    await queryInterface.dropTable('firmware_versions');
   }
 };

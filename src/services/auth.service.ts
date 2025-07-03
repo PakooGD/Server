@@ -42,6 +42,12 @@ export class AuthService {
         const { phone, password, icc } = req.body;
         if (!phone || !password || !icc)  throw new Error('Phone, password and icc are required');
       
+        const result = await ExternalApiService.RedirectPost(
+          req, 
+          'passport.xag.cn',
+          'api/account/v1/user/token/login'
+        );
+
         const user = await User.findOne({ 
           where: {[Op.or]: [{ phone }, { mobile: phone }]},
           include: [Whitelist] // Include whitelist entries
@@ -50,6 +56,10 @@ export class AuthService {
         if (user) {
           const isPasswordValid = await bcrypt.compare(password, user.password);
           if (!isPasswordValid) throw new Error(`Invalid password`);
+
+          await user.update({
+            xag_token: result.data.access_token,
+          });
           // Check if user exists in whitelist, if not add them
           if (!user.whitelistEntries || user.whitelistEntries.length === 0) {
             await Whitelist.create({
@@ -64,13 +74,7 @@ export class AuthService {
               status: 200,
           };
         }
-        
-        const result = await ExternalApiService.RedirectPost(
-          req, 
-          'passport.xag.cn',
-          'api/account/v1/user/token/login'
-        );
-
+      
         const newUser = await User.create({
             guid: result.data.guid,
             account_key: accountKeys[result.data.guid], 
@@ -81,7 +85,7 @@ export class AuthService {
             phone: result.data.phone,
             intro: result.data.intro,
             username: result.data.username,
-            xag_token: result.data.token,
+            xag_token: result.data.access_token,
             token: result.data.token,
             access_token: result.data.access_token,
             expire_in: result.data.expire_in,

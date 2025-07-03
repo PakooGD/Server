@@ -26,9 +26,7 @@ export class ExternalApiService {
     headers.host = host;
 
     const url = `https://${host}/${api}`;
-    logger.info("Request URL:", url);
-    logger.info("Headers:", headers);
-    logger.info("params:", params);
+
     const response = await axios.get(url, {
       headers,
       params,
