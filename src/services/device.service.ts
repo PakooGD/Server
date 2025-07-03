@@ -4,6 +4,7 @@ import { Device } from '../models/device.model';
 import { TokenService } from './token.service';
 import { ExternalApiService } from '.'
 import axios from 'axios';
+import { logger } from '../app';
 
 const deviceStatusCache: Record<string, any> = {};
 
@@ -69,9 +70,9 @@ export class DeviceService {
       const headers = {...req.headers};
 
       const url = `https://dservice.xa.com/api/equipment/device/searchInfo?serial_number=175850124D4X`;
-      console.log("Request URL:", url);
-      console.log("Headers:", headers);
-      console.log("params:", params);
+      logger.info("Request URL:", url);
+      logger.info("Headers:", headers);
+      logger.info("params:", params);
       const response = await axios.get(url, {
         headers: {
           ...headers,
@@ -80,8 +81,8 @@ export class DeviceService {
         params,
       });
 
-      console.log(response)
-      console.error(response)  
+      logger.info(response)
+
       const result = response.data
 
       // Modify new_link field to true
