@@ -36,6 +36,7 @@ export class DeviceService {
       }
 
       // Or get from Chinese server
+       // Or get from Chinese server
       const result = await ExternalApiService.RedirectGet(
         req, 
         'dservice.xa.com',
