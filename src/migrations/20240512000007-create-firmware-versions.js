@@ -51,7 +51,6 @@ module.exports = {
       lowest_available_version_uuid: {
         type: Sequelize.STRING,
         allowNull: false,
-        defaultValue: ' '
       },
       release_note: {
         type: Sequelize.TEXT,
@@ -82,7 +81,6 @@ module.exports = {
       dependence_version_uuid: {
         type: Sequelize.UUID,
         allowNull: false,
-        defaultValue: ' '
       },
       createdAt: {
         allowNull: false,
