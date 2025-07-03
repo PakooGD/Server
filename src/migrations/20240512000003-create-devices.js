@@ -12,7 +12,7 @@ module.exports = {
       serial_number: {
         type: Sequelize.STRING(64),
         allowNull: false,
-        unique: true,
+        unique: false,
       },
       dev_id: {
         type: Sequelize.STRING(64),
