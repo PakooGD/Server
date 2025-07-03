@@ -46,7 +46,6 @@ export class FirmwareVersions extends Model {
   @Column(DataType.INTEGER)
   lowest_available_version_code!: number;
 
-  @Default('')
   @AllowNull(false)
   @Column(DataType.STRING)
   lowest_available_version_uuid!: string;
@@ -77,7 +76,6 @@ export class FirmwareVersions extends Model {
   @Column(DataType.INTEGER)
   dependence_version_code!: number;
 
-  @Default('')
   @AllowNull(false)
   @Column(DataType.STRING)
   dependence_version_uuid!: string;

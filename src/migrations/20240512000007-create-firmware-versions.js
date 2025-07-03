@@ -67,11 +67,13 @@ module.exports = {
       },
       app_uuid: {
         type: Sequelize.UUID,
-        allowNull: false
+        allowNull: true,
+        defaultValue: null
       },
       app_version_uuid: {
         type: Sequelize.UUID,
-        allowNull: false
+        allowNull: true,
+        defaultValue: null
       },
       dependence_version_code: {
         type: Sequelize.INTEGER,
@@ -80,7 +82,8 @@ module.exports = {
       },
       dependence_version_uuid: {
         type: Sequelize.UUID,
-        allowNull: false,
+        allowNull: true,
+        defaultValue: null
       },
       createdAt: {
         allowNull: false,
