@@ -115,7 +115,7 @@ export class DeviceService {
       const statusData = deviceStatusCache[serialNumber] || {};
 
       // Create device in database with all required fields
-      await Device.create({
+      await Device.upsert({
           serial_number: serialNumber,
           dev_id: statusData.dev_id || "Nothing",
           model: statusData.model || "Nothing",
