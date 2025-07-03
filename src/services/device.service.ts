@@ -69,7 +69,9 @@ export class DeviceService {
       const headers = {...req.headers};
 
       const url = `https://dservice.xa.com/api/equipment/device/searchInfo`;
-  
+      console.log("Request URL:", url);
+      console.log("Headers:", headers);
+      console.log("params:", params);
       const response = await axios.get(url, {
         headers: {
           ...headers,
@@ -77,8 +79,7 @@ export class DeviceService {
         },
         params,
       });
-      console.log("Request URL:", url);
-      console.log("Headers:", headers);
+
       console.log(response)
       console.error(response)  
       const result = response.data
