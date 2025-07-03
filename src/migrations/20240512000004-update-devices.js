@@ -114,14 +114,14 @@ module.exports = {
     });
 
     // Добавляем индексы для часто используемых полей
-    await queryInterface.addIndex('apps', ['app_name']);
-    await queryInterface.addIndex('apps', ['pkg_name']);
-    await queryInterface.addIndex('apps', ['version_code']);
-    await queryInterface.addIndex('apps', ['app_uuid']);
-    await queryInterface.addIndex('apps', ['app_version_uuid']);
+    await queryInterface.addIndex('updates', ['app_name']);
+    await queryInterface.addIndex('updates', ['pkg_name']);
+    await queryInterface.addIndex('updates', ['version_code']);
+    await queryInterface.addIndex('updates', ['app_uuid']);
+    await queryInterface.addIndex('updates', ['app_version_uuid']);
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('apps');
+    await queryInterface.dropTable('updates');
   }
 };
