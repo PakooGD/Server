@@ -65,11 +65,22 @@ export class DeviceService {
       const { serial_number } = req.query; 
       if (!serial_number) throw new Error(`Serial number is required`);
 
-      const result = await ExternalApiService.RedirectGet(
-        req, 
-        'dservice.xa.com',
-        'api/equipment/device/searchInfo'
-      );
+      const params = req.query;
+      const headers = req.headers;
+      headers.host = 'dservice.xa.com';
+  
+      const url = `https://dservice.xa.com/api/equipment/device/searchInfo?serial_number=${serial_number}`;
+  
+      const response = await axios.get(url, {
+        headers,
+      });
+
+      const result = response.data 
+      // const result = await ExternalApiService.RedirectGet(
+      //   req, 
+      //   'dservice.xa.com',
+      //   'api/equipment/device/searchInfo'
+      // );
 
       // Modify new_link field to true
       if (result.data) {
