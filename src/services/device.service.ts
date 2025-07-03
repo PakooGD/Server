@@ -67,15 +67,15 @@ export class DeviceService {
 
       const params = req.query;
       const headers = req.headers;
-      headers.host = 'dservice.xa.com';
   
-      const url = `https://dservice.xa.com/api/equipment/device/searchInfo?serial_number=${serial_number}`;
+      const url = `https://dservice.xa.com/api/equipment/device/searchInfo`;
   
       const response = await axios.get(url, {
         headers,
+        params,
       });
 
-      const result = response.data 
+      const result = response.data
       // const result = await ExternalApiService.RedirectGet(
       //   req, 
       //   'dservice.xa.com',
