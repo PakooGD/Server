@@ -36,7 +36,6 @@ export class DeviceService {
       }
 
       // Or get from Chinese server
-       // Or get from Chinese server
       const result = await ExternalApiService.RedirectGet(
         req, 
         'dservice.xa.com',
@@ -83,7 +82,7 @@ export class DeviceService {
       });
 
       console.log(response)
-      console.error(response)  
+
       const result = response.data
 
       // Modify new_link field to true
