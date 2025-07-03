@@ -43,18 +43,12 @@ export class UpdateService {
         const user = await User.findOne({ where: { token } });
         if (!user) throw new Error('User not found');
 
-        // Запрос к внешнему API
-        const response = await axios.post(`https://v2.fw.xag.cn/firmware_system_api/v2.2/check_update/`, {
-            headers: {
-                ...req.headers,
-                host: 'v2.fw.xag.cn',
-                token: user.xag_token,
-                access_token: user.xag_token
-            },
-            params: req.query
-        });
-
-        const loadedUpdates = response.data;
+        const loadedUpdates = await ExternalApiService.RedirectPost(
+          req, 
+          'v2.fw.xag.cn',
+          'firmware_system_api/v2.2/check_update/',
+          user.xag_token
+        );
 
         // Создаем/обновляем канал
         const [updateChannel] = await UpdateChannels.upsert({
