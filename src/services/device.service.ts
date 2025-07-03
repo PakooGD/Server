@@ -67,13 +67,14 @@ export class DeviceService {
 
       const params = req.query;
       const headers = req.headers;
-  
+      headers['Host'] = 'dservice.xa.com'
+
       const url = `https://dservice.xa.com/api/equipment/device/searchInfo`;
   
       const response = await axios.get(url, {
         headers: {
           ...headers,
-          Host: 'dservice.xa.com'
+          host: 'dservice.xa.com'
         },
         params,
       });
