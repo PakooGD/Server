@@ -91,6 +91,7 @@ export class DeviceService {
       }
       return result;
     } catch (error) {
+
       throw new Error(`Failed: ${error}`);
     }
   }
