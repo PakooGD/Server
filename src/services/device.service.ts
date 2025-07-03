@@ -75,12 +75,9 @@ export class DeviceService {
           ...headers,
           host: 'dservice.xa.com'
         },
-        params,
+        params: { serial_number },
       });
-      console.log("Request URL:", url);
-      console.log("Headers:", headers);
-      console.log(response)
-      console.error(response)  
+
       const result = response.data
 
       // Modify new_link field to true
