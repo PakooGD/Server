@@ -50,7 +50,7 @@ export class AuthService {
         );
 
         const user = await User.findOne({ 
-          where: {[Op.or]: [{ phone }, { mobile: phone }]},
+          where: { mobile: phone, icc: icc },
           include: [Whitelist] // Include whitelist entries
         });
 
