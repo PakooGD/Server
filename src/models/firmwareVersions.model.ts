@@ -1,4 +1,4 @@
-import { Table, Column, Model, DataType, AllowNull, PrimaryKey, AutoIncrement, Default, ForeignKey } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, AllowNull, PrimaryKey, AutoIncrement, Default, ForeignKey,BelongsTo } from 'sequelize-typescript';
 import { Firmwares } from '.';
 
 @Table({
@@ -16,6 +16,9 @@ export class FirmwareVersions extends Model {
   @ForeignKey(() => Firmwares)
   @Column(DataType.INTEGER)
   firmware_id!: number;
+
+  @BelongsTo(() => Firmwares)
+  firmware!: Firmwares;
 
   @AllowNull(false)
   @Column(DataType.INTEGER)

@@ -1,4 +1,4 @@
-import { Table, Column, Model, DataType, AllowNull, PrimaryKey, AutoIncrement, Default, ForeignKey } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, AllowNull, PrimaryKey, ForeignKey } from 'sequelize-typescript';
 import { Firmwares, UpdateChannels } from '.';
 
 @Table({

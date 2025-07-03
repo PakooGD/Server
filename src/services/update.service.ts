@@ -34,154 +34,154 @@ export class UpdateService {
   static async CheckUpdate(req: any): Promise<any> {
     const transaction = await sequelize.transaction();
     try {
-      const {app_list, channel, target_version_code, version_code} = req.body;
-      if (!app_list || !channel || !Array.isArray(app_list) || !target_version_code || !version_code) throw new Error('There is no data in post request');
-      
-      const token = req.headers.token;
+        const { app_list, channel, target_version_code, version_code } = req.body;
+        if (!app_list || !channel || !Array.isArray(app_list) || !target_version_code || !version_code) {
+            throw new Error('Invalid request data');
+        }
 
-      const user = await User.findOne({ where: { token } });
-      if (!user) throw new Error('User not found');
+        const token = req.headers.token;
+        const user = await User.findOne({ where: { token } });
+        if (!user) throw new Error('User not found');
 
-      const params = req.query;
-      const headers = req.headers;
-      headers.host = 'v2.fw.xag.cn';
-      headers.token = user.xag_token;
-      headers.access_token = user.xag_token;
-  
-      const response = await axios.post(`https://v2.fw.xag.cn/firmware_system_api/v2.2/check_update/`, {
-        headers,
-        params,
-      });
+        // Запрос к внешнему API
+        const response = await axios.post(`https://v2.fw.xag.cn/firmware_system_api/v2.2/check_update/`, {
+            headers: {
+                ...req.headers,
+                host: 'v2.fw.xag.cn',
+                token: user.xag_token,
+                access_token: user.xag_token
+            },
+            params: req.query
+        });
 
-      const loadedUpdates = response.data;
+        const loadedUpdates = response.data;
 
-      // Создаем/обновляем канал
-      const [updateChannel] = await UpdateChannels.upsert({
-        channel,
-        ota_uuid: loadedUpdates.ota_uuid || "",
-        target_version_code: loadedUpdates.target_version_code || 0,
-        version_code: loadedUpdates.version_code || 0,
-        version_name: loadedUpdates.version_name || "",
-        version_type: loadedUpdates.version_type || 0
-      }, { transaction });
-
-      // Обрабатываем каждое приложение
-      for (const firmwareToUpdate of app_list) {
-        const [firmware] = await Firmwares.upsert({
-          app_name: firmwareToUpdate.app_name,
-          app_type: firmwareToUpdate.app_type || 0,
-          display_name: firmwareToUpdate.display_name,
-          group_name: firmwareToUpdate.group_name,
-          pkg_name: firmwareToUpdate.pkg_name,
+        // Создаем/обновляем канал
+        const [updateChannel] = await UpdateChannels.upsert({
+            channel,
+            ota_uuid: loadedUpdates.ota_uuid || "",
+            target_version_code: loadedUpdates.target_version_code || 0,
+            version_code: loadedUpdates.version_code || 0,
+            version_name: loadedUpdates.version_name || "",
+            version_type: loadedUpdates.version_type || 0
         }, { transaction });
 
-        // Связываем приложение с каналом
-        await ChannelsToFirmware.upsert({
-          channel_id: updateChannel.id,
-          firmware_id: firmware.id
-        }, { transaction });
+        // Подготовка данных для массовой вставки
+        const firmwarePromises = app_list.map(fw => Firmwares.upsert({
+            app_name: fw.app_name,
+            app_type: fw.app_type || 0,
+            display_name: fw.display_name,
+            group_name: fw.group_name,
+            pkg_name: fw.pkg_name,
+        }, { transaction }));
 
-        // Создаем версию приложения
-        await FirmwareVersions.upsert({
-          firmware_id: firmware.id,
-          version_code: firmwareToUpdate.version_code,
-          version_name: firmwareToUpdate.version_name,
-          file_md5: firmwareToUpdate.file_md5,
-          file_path: firmwareToUpdate.file_path,
-          file_url: firmwareToUpdate.file_url,
-          file_size: firmwareToUpdate.file_size,
-          lowest_available_version_code: firmwareToUpdate.lowest_available_version_code || 0,
-          lowest_available_version_uuid: firmwareToUpdate.lowest_available_version_uuid || "",
-          release_note: firmwareToUpdate.release_note,
-          required: firmwareToUpdate.required || false,
-          update_index: firmwareToUpdate.update_index || 0,
-          app_uuid: firmwareToUpdate.app_uuid,
-          app_version_uuid: firmwareToUpdate.app_version_uuid,
-          dependence_version_code: firmwareToUpdate.dependence_version_code || 0,
-          dependence_version_uuid: firmwareToUpdate.dependence_version_uuid || "",
-        }, { transaction });
-      }
+        const firmwares = await Promise.all(firmwarePromises);
 
-      const localUpdateChannel = await UpdateChannels.findOne({ 
-        where: { 
-          channel, 
-          target_version_code: { [Op.lte]: target_version_code },
-          version_code: { [Op.lte]: version_code } 
-        }, 
-        transaction
-      });
+        // Связываем приложения с каналом
+        const channelLinks = firmwares.map(([fw]) => ChannelsToFirmware.upsert({
+            channel_id: updateChannel.id,
+            firmware_id: fw.id
+        }, { transaction }));
 
-      const updates = [];
+        // Создаем версии приложений
+        const versionPromises = app_list.map((fw, i) => FirmwareVersions.upsert({
+            firmware_id: firmwares[i][0].id,
+            version_code: fw.version_code,
+            version_name: fw.version_name,
+            file_md5: fw.file_md5,
+            file_path: fw.file_path,
+            file_url: fw.file_url,
+            file_size: fw.file_size,
+            lowest_available_version_code: fw.lowest_available_version_code || 0,
+            lowest_available_version_uuid: fw.lowest_available_version_uuid || "",
+            release_note: fw.release_note,
+            required: fw.required || false,
+            update_index: fw.update_index || 0,
+            app_uuid: fw.app_uuid,
+            app_version_uuid: fw.app_version_uuid,
+            dependence_version_code: fw.dependence_version_code || 0,
+            dependence_version_uuid: fw.dependence_version_uuid || "",
+        }, { transaction }));
 
-      if (localUpdateChannel){
-        for (const reqFirmware of app_list) {
-          // Находим приложение, связанное с каналом
-          const firmware = await Firmwares.findOne({ 
+        await Promise.all([...channelLinks, ...versionPromises]);
+
+        // Поиск доступных обновлений
+        const localUpdateChannel = await UpdateChannels.findOne({ 
+            where: { 
+                channel, 
+                target_version_code: { [Op.lte]: target_version_code },
+                version_code: { [Op.lte]: version_code } 
+            }, 
             include: [{
-              model: ChannelsToFirmware,
-              where: {channel_id: localUpdateChannel.id}
+                model: Firmwares,
+                include: [{
+                    model: FirmwareVersions,
+                    where: {
+                        version_code: { [Op.gt]: version_code }
+                    },
+                    required: false
+                }]
             }],
-            where: {pkg_name: reqFirmware.pkg_name },
             transaction
-          })
+        });
 
-          if (firmware) {
-            // Ищем последнюю версию новее запрошенной
-            const latestVersion = await FirmwareVersions.findOne({
-              where: {
-                firmware_id: firmware.id,
-                version_code: { [Op.gt]: reqFirmware.version_code }
-              },
-              order: [['version_code', 'DESC']],
-              transaction
+        if (!localUpdateChannel) {
+            await transaction.commit();
+            return {
+                code: 200,
+                data: {},
+                message: "No updates available"
+            };
+        }
+
+        // Фильтрация обновлений
+        const updates = localUpdateChannel.firmwares
+            .filter(fw => fw.firmware_versions.length > 0)
+            .map(fw => {
+                const latestVersion = fw.firmware_versions[0]; // Уже отсортировано
+                return {
+                    app_name: fw.app_name,
+                    app_type: fw.app_type,
+                    app_uuid: latestVersion.app_uuid,
+                    app_version_uuid: latestVersion.app_version_uuid,
+                    dependence_version_code: latestVersion.dependence_version_code,
+                    dependence_version_uuid: latestVersion.dependence_version_uuid,
+                    display_name: fw.display_name,
+                    file_md5: latestVersion.file_md5,
+                    file_path: latestVersion.file_path,
+                    file_size: latestVersion.file_size,
+                    file_url: latestVersion.file_url,
+                    group_name: fw.group_name,
+                    lowest_available_version_code: latestVersion.lowest_available_version_code,
+                    lowest_available_version_uuid: latestVersion.lowest_available_version_uuid,
+                    pkg_name: fw.pkg_name,
+                    release_note: latestVersion.release_note,
+                    required: latestVersion.required,
+                    update_index: latestVersion.update_index,
+                    version_code: latestVersion.version_code,
+                    version_name: latestVersion.version_name
+                };
             });
-
-            if (latestVersion) {
-              updates.push({
-                app_name: firmware.app_name,
-                app_type: firmware.app_type,
-                app_uuid: latestVersion.app_uuid,
-                app_version_uuid: latestVersion.app_version_uuid,
-                dependence_version_code: latestVersion.dependence_version_code,
-                dependence_version_uuid: latestVersion.dependence_version_uuid,
-                display_name: firmware.display_name,
-                file_md5: latestVersion.file_md5,
-                file_path: latestVersion.file_path,
-                file_size: latestVersion.file_size,
-                file_url: latestVersion.file_url,
-                group_name: firmware.group_name,
-                lowest_available_version_code: latestVersion.lowest_available_version_code,
-                lowest_available_version_uuid: latestVersion.lowest_available_version_uuid,
-                pkg_name: firmware.pkg_name,
-                release_note: latestVersion.release_note,
-                required: latestVersion.required,
-                update_index: latestVersion.update_index,
-                version_code: latestVersion.version_code,
-                version_name: latestVersion.version_name
-              });
-            }
-          }
-        }; 
 
         await transaction.commit();
 
         return {
-          "code": 200,
-          "data": {
-            "app_list": updates,
-            "channel": localUpdateChannel.channel,
-            "ota_uuid": localUpdateChannel.ota_uuid,
-            "target_version_code": localUpdateChannel.target_version_code,
-            "version_code": localUpdateChannel.version_code,
-            "version_name": localUpdateChannel.version_name,
-            "version_type": localUpdateChannel.version_type,
-          },
-          "message": ""
-        }
-      }
+            code: 200,
+            data: {
+                app_list: updates,
+                channel: localUpdateChannel.channel,
+                ota_uuid: localUpdateChannel.ota_uuid,
+                target_version_code: localUpdateChannel.target_version_code,
+                version_code: localUpdateChannel.version_code,
+                version_name: localUpdateChannel.version_name,
+                version_type: localUpdateChannel.version_type,
+            },
+            message: updates.length ? "" : "No updates available"
+        };
     } catch (error) {
-      await transaction.rollback();
-      throw new Error(`Failed: ${error}`);
+        await transaction.rollback();
+        logger.error(`CheckUpdate failed: ${error}`);
+        throw new Error(`Failed to check updates: ${error}`);
     }
   }
 }

@@ -1,4 +1,5 @@
-import { Table, Column, Model, DataType, AllowNull, PrimaryKey, AutoIncrement, Default, ForeignKey } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, AllowNull, PrimaryKey, AutoIncrement, HasMany, ForeignKey,BelongsToMany } from 'sequelize-typescript';
+import { UpdateChannels, ChannelsToFirmware,FirmwareVersions } from '.';
 
 @Table({
   tableName: 'firmwares',
@@ -31,4 +32,10 @@ export class Firmwares extends Model {
   @AllowNull(false)
   @Column(DataType.STRING)
   pkg_name!: string;
+
+  @HasMany(() => FirmwareVersions)
+  firmware_versions!: FirmwareVersions[];
+
+  @BelongsToMany(() => UpdateChannels, () => ChannelsToFirmware)
+  channels!: UpdateChannels[];
 }
