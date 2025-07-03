@@ -39,7 +39,7 @@ router.get('/api/land/v1/detail', MapsController.LandDetail);
 router.post('/api/work/v1/recordShow/listByCondition', MapsController.ListByCondition); // deprecated
 router.post('/flightImageParentTask/page', MapsController.FlightPage); 
 
-router.post('firmware_system_api/v2.2/get_update', UpdateController.GetUpdate); // could be a problem with one of the requests on client
+router.get('firmware_system_api/v2.2/get_update', UpdateController.GetUpdate); // could be a problem with one of the requests on client
 router.post('firmware_system_api/v2.2/check_update', UpdateController.CheckUpdate); // could be a problem with one of the requests on client
 
 

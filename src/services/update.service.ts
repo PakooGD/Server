@@ -48,7 +48,7 @@ export class UpdateService {
       headers.token = user.xag_token;
       headers.access_token = user.xag_token;
   
-      const response = await axios.get(`https://v2.fw.xag.cn/firmware_system_api/v2.2/check_update/`, {
+      const response = await axios.post(`https://v2.fw.xag.cn/firmware_system_api/v2.2/check_update/`, {
         headers,
         params,
       });
