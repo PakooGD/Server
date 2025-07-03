@@ -58,7 +58,7 @@ export class AuthService {
           const isPasswordValid = await bcrypt.compare(password, user.password);
           if (!isPasswordValid) throw new Error(`Invalid password`);
 
-          await User.upsert({
+          await user.update({
             xag_token: result.data.access_token,
           });
           
