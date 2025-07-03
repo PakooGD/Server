@@ -79,7 +79,7 @@ export class DeviceService {
       });
 
       console.log(response)
-          
+      console.error(response)  
       const result = response.data
 
       // Modify new_link field to true
