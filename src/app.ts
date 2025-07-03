@@ -101,23 +101,23 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/', xagRoutes);
 
 
-// Error handling
-app.use(errorHandler);
+// // Error handling
+// app.use(errorHandler);
 
-// Логирование ошибок
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  logger.error('Error occurred', {
-    error: err.message,
-    stack: err.stack,
-    request: {
-      method: req.method,
-      url: req.originalUrl,
-      headers: req.headers,
-      body: req.body
-    }
-  });
-  next(err);
-});
+// // Логирование ошибок
+// app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+//   logger.error('Error occurred', {
+//     error: err.message,
+//     stack: err.stack,
+//     request: {
+//       method: req.method,
+//       url: req.originalUrl,
+//       headers: req.headers,
+//       body: req.body
+//     }
+//   });
+//   next(err);
+// });
 
 // Database sync
 sequelize.authenticate()
