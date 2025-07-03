@@ -74,7 +74,7 @@ export class DeviceService {
       const response = await axios.get(url, {
         headers: {
           ...headers,
-          host: 'dservice.xa.com'
+     
         },
         params,
       });
