@@ -6,34 +6,36 @@ module.exports = {
       channel_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
+        primaryKey: true,
         references: {
           model: 'update_channels',
           key: 'id'
-        }
+        },
+        onDelete: 'CASCADE'
       },
       firmware_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
+        primaryKey: true,
         references: {
           model: 'firmwares',
           key: 'id'
-        }
+        },
+        onDelete: 'CASCADE'
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
       }
     });
 
-    await queryInterface.addConstraint('channels_firmwares', {
-      fields: ['channel_id', 'firmware_id'],
-      type: 'primary key',
-      name: 'channel_firmwares_pkey'
-    });
+    // Добавляем индексы для внешних ключей
     await queryInterface.addIndex('channels_firmwares', ['channel_id']);
     await queryInterface.addIndex('channels_firmwares', ['firmware_id']);
   },

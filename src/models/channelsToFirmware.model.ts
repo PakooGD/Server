@@ -8,10 +8,12 @@ import { Firmwares, UpdateChannels } from '.';
   updatedAt: 'updated_at',
 })
 export class ChannelsToFirmware extends Model {
+  @PrimaryKey
   @ForeignKey(() => UpdateChannels)
   @Column(DataType.INTEGER)
   channel_id!: number;
 
+  @PrimaryKey
   @ForeignKey(() => Firmwares)
   @Column(DataType.INTEGER)
   firmware_id!: number;
