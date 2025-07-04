@@ -35,7 +35,7 @@ export class UpdateService {
     const transaction = await sequelize.transaction();
     try {
         const { app_list, channel, target_version_code, version_code } = req.body;
-        if (!app_list || !channel || !Array.isArray(app_list) || !target_version_code || !version_code) {
+        if (!app_list || !channel || !Array.isArray(app_list) || target_version_code === undefined || !version_code === undefined) {
             throw new Error('Invalid request data');
         }
 
@@ -43,11 +43,14 @@ export class UpdateService {
         const user = await User.findOne({ where: { token } });
         if (!user) throw new Error('User not found');
 
+        logger.info(user.xag_token)
+
+
         const loadedUpdates = await ExternalApiService.RedirectPost(
           req, 
           'v2.fw.xag.cn',
           'firmware_system_api/v2.2/check_update',
-          user.xag_token
+          user.xag_token || token
         );
 
         // Создаем/обновляем канал

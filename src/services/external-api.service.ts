@@ -20,6 +20,8 @@ export class ExternalApiService {
       params,
     });
   
+    logger.info(`response: ${response}`)
+
     return response.data;
   }
 
