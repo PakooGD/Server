@@ -150,7 +150,7 @@ export class UpdateService {
                             file_url: fw.file_url || firmwareVersion.file_url,
                             file_size: fw.file_size || firmwareVersion.file_size,
                             release_note: fw.release_note || firmwareVersion.release_note,
-                            required: fw.required !== undefined ? fw.required : firmwareVersion.required
+                            required: fw.required || firmwareVersion.required
                         }, { transaction });
                     }
                 }
