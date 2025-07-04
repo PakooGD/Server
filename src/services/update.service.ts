@@ -35,16 +35,13 @@ export class UpdateService {
     const transaction = await sequelize.transaction();
     try {
         const { app_list, channel, target_version_code, version_code } = req.body;
-        if (!app_list || !channel || !Array.isArray(app_list) || target_version_code === undefined || !version_code === undefined) {
+        if (!app_list || !channel || !Array.isArray(app_list) || target_version_code === undefined || version_code === undefined) {
             throw new Error('Invalid request data');
         }
 
         const token = req.headers.token;
-        const user = await User.findOne({ where: { token } });
+        const user = await User.findOne({ where: { token }, transaction });
         if (!user) throw new Error('User not found');
-
-        logger.info(user.xag_token)
-
 
         const loadedUpdates = await ExternalApiService.RedirectPost(
           req, 
@@ -53,54 +50,110 @@ export class UpdateService {
           user.xag_token || token
         );
 
-        // Создаем/обновляем канал
-        const [updateChannel] = await UpdateChannels.upsert({
-            channel,
-            ota_uuid: loadedUpdates.ota_uuid || "",
-            target_version_code: loadedUpdates.target_version_code || 0,
-            version_code: loadedUpdates.version_code || 0,
-            version_name: loadedUpdates.version_name || "",
-            version_type: loadedUpdates.version_type || 0
-        }, { transaction });
+        let updateChannel = await UpdateChannels.findOne({
+            where: { channel },
+            transaction
+        });
 
-        // Подготовка данных для массовой вставки
-        const firmwarePromises = app_list.map(fw => Firmwares.upsert({
-            app_name: fw.app_name,
-            app_type: fw.app_type || 0,
-            display_name: fw.display_name,
-            group_name: fw.group_name,
-            pkg_name: fw.pkg_name,
-        }, { transaction }));
+        if(!updateChannel){
+            updateChannel = await UpdateChannels.create({
+                channel,
+                ota_uuid: loadedUpdates.ota_uuid,
+                target_version_code: loadedUpdates.target_version_code,
+                version_code: loadedUpdates.version_code,
+                version_name: loadedUpdates.version_name,
+                version_type: loadedUpdates.version_type
+            }, { transaction });
+        } else {
+            await updateChannel.update({
+                ota_uuid: loadedUpdates.ota_uuid || updateChannel.ota_uuid,
+                target_version_code: loadedUpdates.target_version_code || updateChannel.target_version_code,
+                version_code: loadedUpdates.version_code || updateChannel.version_code,
+                version_name: loadedUpdates.version_name || updateChannel.version_name,
+                version_type: loadedUpdates.version_type || updateChannel.version_type
+            }, { transaction });
+        }
 
-        const firmwares = await Promise.all(firmwarePromises);
-
-        // Связываем приложения с каналом
-        const channelLinks = firmwares.map(([fw]) => ChannelsToFirmware.upsert({
-            channel_id: updateChannel.id,
-            firmware_id: fw.id
-        }, { transaction }));
-
-        // Создаем версии приложений
-        const versionPromises = app_list.map((fw, i) => FirmwareVersions.upsert({
-            firmware_id: firmwares[i][0].id,
-            version_code: fw.version_code,
-            version_name: fw.version_name,
-            file_md5: fw.file_md5,
-            file_path: fw.file_path,
-            file_url: fw.file_url,
-            file_size: fw.file_size,
-            lowest_available_version_code: fw.lowest_available_version_code || 0,
-            lowest_available_version_uuid: fw.lowest_available_version_uuid || "",
-            release_note: fw.release_note,
-            required: fw.required || false,
-            update_index: fw.update_index || 0,
-            app_uuid: fw.app_uuid,
-            app_version_uuid: fw.app_version_uuid,
-            dependence_version_code: fw.dependence_version_code || 0,
-            dependence_version_uuid: fw.dependence_version_uuid || "",
-        }, { transaction }));
-
-        await Promise.all([...channelLinks, ...versionPromises]);
+                // Обработка firmware
+                for (const fw of app_list) {
+                    let firmware = await Firmwares.findOne({
+                        where: { pkg_name: fw.pkg_name },
+                        transaction
+                    });
+        
+                    if (!firmware) {
+                        firmware = await Firmwares.create({
+                            app_name: fw.app_name,
+                            app_type: fw.app_type || 0,
+                            display_name: fw.display_name,
+                            group_name: fw.group_name,
+                            pkg_name: fw.pkg_name
+                        }, { transaction });
+                    } else {
+                        await firmware.update({
+                            app_name: fw.app_name || firmware.app_name,
+                            app_type: fw.app_type || firmware.app_type,
+                            display_name: fw.display_name || firmware.display_name,
+                            group_name: fw.group_name || firmware.group_name
+                        }, { transaction });
+                    }
+        
+                    // Связь с каналом
+                    const channelLink = await ChannelsToFirmware.findOne({
+                        where: {
+                            channel_id: updateChannel.id,
+                            firmware_id: firmware.id
+                        },
+                        transaction
+                    });
+        
+                    if (!channelLink) {
+                        await ChannelsToFirmware.create({
+                            channel_id: updateChannel.id,
+                            firmware_id: firmware.id
+                        }, { transaction });
+                    }
+        
+                    // Версия firmware
+                    let firmwareVersion = await FirmwareVersions.findOne({
+                        where: {
+                            firmware_id: firmware.id,
+                            version_code: fw.version_code
+                        },
+                        transaction
+                    });
+        
+                    if (!firmwareVersion) {
+                        await FirmwareVersions.create({
+                            firmware_id: firmware.id,
+                            version_code: fw.version_code,
+                            version_name: fw.version_name,
+                            file_md5: fw.file_md5 || "",
+                            file_path: fw.file_path || "",
+                            file_url: fw.file_url || "",
+                            file_size: fw.file_size || 0,
+                            lowest_available_version_code: fw.lowest_available_version_code || 0,
+                            lowest_available_version_uuid: fw.lowest_available_version_uuid || "",
+                            release_note: fw.release_note || "",
+                            required: fw.required || false,
+                            update_index: fw.update_index || 0,
+                            app_uuid: fw.app_uuid || "",
+                            app_version_uuid: fw.app_version_uuid || "",
+                            dependence_version_code: fw.dependence_version_code || 0,
+                            dependence_version_uuid: fw.dependence_version_uuid || ""
+                        }, { transaction });
+                    } else {
+                        await firmwareVersion.update({
+                            version_name: fw.version_name || firmwareVersion.version_name,
+                            file_md5: fw.file_md5 || firmwareVersion.file_md5,
+                            file_path: fw.file_path || firmwareVersion.file_path,
+                            file_url: fw.file_url || firmwareVersion.file_url,
+                            file_size: fw.file_size || firmwareVersion.file_size,
+                            release_note: fw.release_note || firmwareVersion.release_note,
+                            required: fw.required !== undefined ? fw.required : firmwareVersion.required
+                        }, { transaction });
+                    }
+                }
 
         // Поиск доступных обновлений
         const localUpdateChannel = await UpdateChannels.findOne({ 
@@ -122,7 +175,7 @@ export class UpdateService {
             transaction
         });
 
-        if (!localUpdateChannel) {
+        if (!localUpdateChannel || !localUpdateChannel.firmwares) {
             await transaction.commit();
             return {
                 code: 200,
@@ -131,11 +184,11 @@ export class UpdateService {
             };
         }
 
-        // Фильтрация обновлений
+        // Форматирование ответа
         const updates = localUpdateChannel.firmwares
             .filter(fw => fw.firmware_versions.length > 0)
             .map(fw => {
-                const latestVersion = fw.firmware_versions[0]; // Уже отсортировано
+                const latestVersion = fw.firmware_versions[0];
                 return {
                     app_name: fw.app_name,
                     app_type: fw.app_type,
