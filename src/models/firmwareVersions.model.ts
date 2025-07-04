@@ -67,11 +67,11 @@ export class FirmwareVersions extends Model {
   update_index!: number;
 
   @AllowNull(false)
-  @Column(DataType.UUID)
+  @Column(DataType.STRING)
   app_uuid!: string;
 
   @AllowNull(false)
-  @Column(DataType.UUID)
+  @Column(DataType.STRING)
   app_version_uuid!: string;
 
   @Default(0)

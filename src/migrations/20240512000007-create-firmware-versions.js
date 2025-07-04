@@ -66,14 +66,14 @@ module.exports = {
         allowNull: false
       },
       app_uuid: {
-        type: Sequelize.UUID,
+        type: Sequelize.STRING,
         allowNull: true,
-        defaultValue: null
+        defaultValue: ''
       },
       app_version_uuid: {
-        type: Sequelize.UUID,
+        type: Sequelize.STRING,
         allowNull: true,
-        defaultValue: null
+        defaultValue: ''
       },
       dependence_version_code: {
         type: Sequelize.INTEGER,
@@ -81,9 +81,9 @@ module.exports = {
         defaultValue: 0
       },
       dependence_version_uuid: {
-        type: Sequelize.UUID,
+        type: Sequelize.STRING,
         allowNull: true,
-        defaultValue: null
+        defaultValue: ''
       },
       createdAt: {
         allowNull: false,

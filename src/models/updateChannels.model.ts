@@ -18,7 +18,7 @@ export class UpdateChannels extends Model {
   channel!: string;
 
   @AllowNull(false)
-  @Column(DataType.UUID)
+  @Column(DataType.STRING)
   ota_uuid!: string;
 
   @AllowNull(false)

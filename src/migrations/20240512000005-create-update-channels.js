@@ -14,7 +14,7 @@ module.exports = {
         allowNull: false
       },
       ota_uuid: {
-        type: Sequelize.UUID,
+        type: Sequelize.STRING,
         allowNull: false
       },
       target_version_code: {
