@@ -46,7 +46,7 @@ export class UpdateService {
         const loadedUpdates = await ExternalApiService.RedirectPost(
           req, 
           'v2.fw.xag.cn',
-          'firmware_system_api/v2.2/check_update/',
+          'firmware_system_api/v2.2/check_update',
           user.xag_token
         );
 

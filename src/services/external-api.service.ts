@@ -11,7 +11,7 @@ export class ExternalApiService {
     headers.host = host;
     if(xag_token != 'default'){
       headers.token = xag_token;
-      headers.access_token = xag_token;
+      params.access_token = xag_token;
     }
     const url = `https://${host}/${api}`;
 
@@ -29,8 +29,9 @@ export class ExternalApiService {
     headers.host = host;
     if(xag_token != 'default'){
       headers.token = xag_token;
-      headers.access_token = xag_token;
+      params.access_token = xag_token;
     }
+
 
     const url = `https://${host}/${api}`;
 
