@@ -13,19 +13,19 @@ export class Firmwares extends Model {
   @Column(DataType.INTEGER)
   id!: number;
 
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.STRING)
   app_name!: string;
 
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.INTEGER)
   app_type!: number;
 
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.STRING)
   display_name!: string;
 
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.STRING)
   group_name!: string;
 

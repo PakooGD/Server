@@ -17,23 +17,23 @@ export class UpdateChannels extends Model {
   @Column(DataType.STRING)
   channel!: string;
 
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.STRING)
   ota_uuid!: string;
 
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.INTEGER)
   target_version_code!: number;
 
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.INTEGER)
   version_code!: number;
 
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.STRING)
   version_name!: string;
 
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.INTEGER)
   version_type!: number;
 
