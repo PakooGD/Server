@@ -47,11 +47,11 @@ export class UpdateService {
           req, 
           'v2.fw.xag.cn',
           'firmware_system_api/v2.2/check_update',
-          user.xag_token || token
+          user.xag_token
         );
 
         let updateChannel = await UpdateChannels.findOne({
-            where: { channel },
+            where: { channel, target_version_code, version_code },
             transaction
         });
 
@@ -75,7 +75,7 @@ export class UpdateService {
         }
 
                 // Обработка firmware
-                for (const fw of app_list) {
+                for (const fw of loadedUpdates.app_list) {
                     let firmware = await Firmwares.findOne({
                         where: { pkg_name: fw.pkg_name },
                         transaction
@@ -84,7 +84,7 @@ export class UpdateService {
                     if (!firmware) {
                         firmware = await Firmwares.create({
                             app_name: fw.app_name,
-                            app_type: fw.app_type || 0,
+                            app_type: fw.app_type,
                             display_name: fw.display_name,
                             group_name: fw.group_name,
                             pkg_name: fw.pkg_name
@@ -128,19 +128,19 @@ export class UpdateService {
                             firmware_id: firmware.id,
                             version_code: fw.version_code,
                             version_name: fw.version_name,
-                            file_md5: fw.file_md5 || "",
-                            file_path: fw.file_path || "",
-                            file_url: fw.file_url || "",
-                            file_size: fw.file_size || 0,
-                            lowest_available_version_code: fw.lowest_available_version_code || 0,
-                            lowest_available_version_uuid: fw.lowest_available_version_uuid || "",
-                            release_note: fw.release_note || "",
-                            required: fw.required || 0,
-                            update_index: fw.update_index || 0,
-                            app_uuid: fw.app_uuid || "",
-                            app_version_uuid: fw.app_version_uuid || "",
-                            dependence_version_code: fw.dependence_version_code || 0,
-                            dependence_version_uuid: fw.dependence_version_uuid || ""
+                            file_md5: fw.file_md5,
+                            file_path: fw.file_path,
+                            file_url: fw.file_url,
+                            file_size: fw.file_size,
+                            lowest_available_version_code: fw.lowest_available_version_code,
+                            lowest_available_version_uuid: fw.lowest_available_version_uuid,
+                            release_note: fw.release_note,
+                            required: fw.required,
+                            update_index: fw.update_index,
+                            app_uuid: fw.app_uuid,
+                            app_version_uuid: fw.app_version_uuid,
+                            dependence_version_code: fw.dependence_version_code,
+                            dependence_version_uuid: fw.dependence_version_uuid
                         }, { transaction });
                     } else {
                         await firmwareVersion.update({
