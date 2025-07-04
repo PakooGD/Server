@@ -135,7 +135,7 @@ export class UpdateService {
                             lowest_available_version_code: fw.lowest_available_version_code || 0,
                             lowest_available_version_uuid: fw.lowest_available_version_uuid || "",
                             release_note: fw.release_note || "",
-                            required: fw.required || false,
+                            required: fw.required || 0,
                             update_index: fw.update_index || 0,
                             app_uuid: fw.app_uuid || "",
                             app_version_uuid: fw.app_version_uuid || "",
